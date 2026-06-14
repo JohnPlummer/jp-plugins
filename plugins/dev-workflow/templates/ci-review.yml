@@ -1,0 +1,59 @@
+# dev-workflow CI review — single-pass, standards-aware, diff-oriented.
+#
+# Drop this into `.github/workflows/` in the repo you want reviewed. It runs the
+# dev-workflow `review-diff` skill on every PR via anthropics/claude-code-action@v1,
+# posting findings as inline comments. The deterministic multi-agent build/review core
+# (the Workflow tool) is NOT available in CI — this is the single-pass entry point. Run the
+# heavy separation-of-judgment review locally before you push.
+#
+# Setup:
+#   1. Install the Claude GitHub App on the repo (run `/install-github-app` once).
+#   2. Add repo secret ANTHROPIC_API_KEY.
+#   3. If your standards repo is private, add a secret STANDARDS_REPO_TOKEN (a PAT with
+#      read access to it). Public standards repos need nothing extra.
+#   4. Point STANDARDS_REPO / STANDARDS_REF below at your external standards source and
+#      pin the ref for deterministic reviews.
+
+name: dev-workflow review
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    # Review on ready-for-review, not on drafts — matches the draft -> mark-ready gate.
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    env:
+      # --- configure your external standards source here ---
+      STANDARDS_REPO: JohnPlummer/engineering-standards
+      STANDARDS_REF: main
+      STANDARDS_PATH: .dev-workflow-standards
+    steps:
+      - name: Check out the PR
+        uses: actions/checkout@v4
+
+      - name: Check out external standards (pinned)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.STANDARDS_REPO }}
+          ref: ${{ env.STANDARDS_REF }}
+          path: ${{ env.STANDARDS_PATH }}
+          token: ${{ secrets.STANDARDS_REPO_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Review the diff
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          plugin_marketplaces: "https://github.com/JohnPlummer/jp-plugins.git"
+          plugins: "dev-workflow@jp"
+          prompt: "/dev-workflow:review-diff ${{ github.repository }}/pull/${{ github.event.pull_request.number }}"
+          claude_args: "--max-turns 20"
+        env:
+          # The review-diff skill reads this to find the checked-out external standards.
+          DEV_WORKFLOW_STANDARDS_PATH: ${{ env.STANDARDS_PATH }}

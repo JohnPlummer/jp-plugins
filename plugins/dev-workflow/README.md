@@ -2,7 +2,7 @@
 
 An opinionated, **deterministic** software development workflow for Claude Code. It encodes a documented engineering philosophy as an executable method — determinism comes from the [Workflow tool](https://code.claude.com/docs/en/workflows) (JS control flow), not from probabilistic skill-triggering.
 
-> **Status: core built.** The build workflow (role-isolated TDD), `plan-feature`, `write-adr`, the `linear` seam, and the `/implement` orchestrator are implemented; the build core is dogfood-proven. Remaining: end-to-end dogfood on a real ticket, CI review action, publish. Build order is in the authoring vault project `Dev Workflow Plugin`.
+> **Status: core built.** The build workflow (role-isolated TDD), `plan-feature`, `write-adr`, the `linear` seam, the `/implement` orchestrator, and the CI review action (`review-diff` skill + `templates/ci-review.yml`) are implemented; the build core is dogfood-proven end-to-end. Remaining: prove the draft-PR slice on a repo with a remote, publish. Build order is in the authoring vault project `Dev Workflow Plugin`.
 
 ## What it does
 
@@ -29,8 +29,27 @@ See [`docs/philosophy.md`](./docs/philosophy.md).
 - `/implement <TICKET>` — primary orchestrator (chains all phases + human gates).
 - `/plan <TICKET>` — ticket -> thin committed plan file with BDD acceptance criteria.
 - `/build <TICKET> <PLAN-PATH>` — run the role-isolated TDD workflow on an approved plan.
-- `/review [PR]` — diff-oriented review (any author) against philosophy + standards.
+- `/review [PR] [--heavy]` — diff-oriented review (any author) against philosophy + standards; light single-pass by default, `--heavy` for the local multi-agent pass. Same engine runs in CI.
 - `/adr "<title>"` — write a MADR 4.0.0 ADR.
+
+## CI review
+
+CI cannot run the Workflow tool, so the deterministic multi-agent build/review core is
+local-only. CI gets a **single-pass, standards-aware, diff-oriented** review via the
+`review-diff` skill running on [`anthropics/claude-code-action@v1`](https://code.claude.com/docs/en/github-actions):
+the action installs this plugin (philosophy travels), checks out your external standards
+repo, and posts inline comments on every PR. Run the heavy separation-of-judgment review
+locally before you push.
+
+Setup:
+
+1. Copy [`templates/ci-review.yml`](./templates/ci-review.yml) into the target repo's `.github/workflows/`.
+2. Install the Claude GitHub App (`/install-github-app`) and add the repo secret `ANTHROPIC_API_KEY`.
+3. Point `STANDARDS_REPO` / `STANDARDS_REF` at your external standards source (pin the ref). If it is private, add a `STANDARDS_REPO_TOKEN` secret.
+
+Standards resolve as a cascade — external repo (pinned) -> repo `CLAUDE.md` / `REVIEW.md`,
+repo wins on conflict. `REVIEW.md` recalibrates severity, caps nits, and adds repo-specific
+checks. Findings are tagged 🔴 Important / 🟡 Nit / 🟣 Pre-existing.
 
 ## Build interface contract (Makefile)
 
