@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# branch-name.sh — deterministic branch name from a ticket, per the github-flow standard.
+# branch-name.sh - deterministic branch name from a ticket, per the github-flow standard.
 # Zero runtime deps. The one purely-mechanical touchpoint of the linear seam; the other
 # four (get-ticket, set-status, link-PR, comment) are MCP-backed and live in the skill.
 #

@@ -1,20 +1,17 @@
 # linear
 
-Linear tracker capability for Claude Code, behind one narrow seam. Used by [`dev-workflow`](../dev-workflow) as a native dependency; usable standalone.
+The Linear tracker capability for Claude Code. A full Linear manager, plus the tracker seam that [`dev-workflow`](../dev-workflow) depends on as a native dependency. Usable standalone.
 
-## The seam (5 touchpoints)
+## Skills
 
-Documented in the [`seam`](./skills/seam/SKILL.md) skill. Four wrap the `linear-server` MCP; `branch-name` is a deterministic script.
+- **`linear`** ([SKILL.md](./skills/linear/SKILL.md)) - all Linear operations: create/view/update issues, status, assignment, labels, comments, search, projects, sub-issues, blocking. Also documents the five-touchpoint contract dev-workflow relies on.
+- **`ticket-composer`** ([SKILL.md](./skills/ticket-composer/SKILL.md)) - composes well-structured ticket content (templates, interview guide, examples). The `linear` skill chains to it for creates and rewrites; not invoked directly.
 
-- **get-ticket**: read a ticket + all comments (`get_issue` + `list_comments`)
-- **set-status**: transition workflow status (runtime state lookup, no hardcoding)
-- **branch-name**: derive `<ID>-<slug>` from a ticket ([`scripts/branch-name.sh`](./scripts/branch-name.sh))
-- **link-PR**: attach the PR to the ticket + `Closes: <ID>` in the PR body
-- **comment**: post a work-log comment (decisions, failures, options)
+Integration is **MCP, not CLI**: the official `linear-server` remote MCP (`https://mcp.linear.app/mcp`, OAuth). `branch-name` is the one deterministic script ([scripts/branch-name.sh](./scripts/branch-name.sh)).
 
-Linear-specific for v1 (no generic tracker interface yet - YAGNI). A future Jira/GitHub tracker would implement the same five touchpoints behind the same names.
+## dev-workflow contract (5 touchpoints)
 
-Integration is **MCP, not CLI**: the official `linear-server` remote MCP (`https://mcp.linear.app/mcp`, OAuth). The seam may be absent in headless/cron runs; MCP touchpoints inside the headless build are best-effort (log and continue, never fail the build).
+dev-workflow uses exactly five operations from the `linear` skill, the stable contract between the two plugins: **get-ticket**, **set-status**, **branch-name**, **link-PR**, **comment**. A future Jira/GitHub tracker plugin would implement the same five behind the same names. Inside the headless build, the MCP touchpoints (set-status, comment) are best-effort: if the MCP is absent, log and continue, never fail the build. Full detail in the `linear` skill's contract section.
 
 ## Setup
 
@@ -50,10 +47,10 @@ Each repo points at its own team via its own `settings.local.json`.
 
 ## Auth
 
-OAuth via the `linear-server` MCP - there is **no Linear token to store**. On first use, OAuth fires against the workspace matching `$LINEAR_WORKSPACE` on that machine. The seam's safety check (`get_team` against `$LINEAR_DEFAULT_TEAM_ID`) refuses to operate if the wrong workspace is authenticated, so it can't write to the wrong place. Secrets are never repo-level.
+OAuth via the `linear-server` MCP - there is **no Linear token to store**. On first use, OAuth fires against the workspace matching `$LINEAR_WORKSPACE` on that machine. The skill's safety check (`get_team` against `$LINEAR_DEFAULT_TEAM_ID`) refuses to operate if the wrong workspace is authenticated, so it can't write to the wrong place. Secrets are never repo-level.
 
 ## Projects
 
 Linear hierarchy is team (required) -> project (optional) -> issue. This plugin uses **projects, not initiatives** (the layer above projects - unneeded for a single team).
 
-Project is **ticket metadata, not repo config**: it is chosen when a ticket is created and read off the ticket thereafter. Project<->repo is **many-to-many**: a monorepo serves several projects, and one project can span an API repo plus a web-app repo - so project is never derived from the repo or the repo from the project. The five seam touchpoints don't need it; ticket creation (today, the standalone `linear` skill) sets it. No `LINEAR_DEFAULT_PROJECT_*` env is read yet; a soft per-repo default may be added when ticket creation moves into this plugin.
+Project is **ticket metadata, not repo config**: it is chosen when a ticket is created and read off the ticket thereafter. Project<->repo is **many-to-many**: a monorepo serves several projects, and one project can span an API repo plus a web-app repo - so project is never derived from the repo or the repo from the project. The five contract touchpoints don't need it; the `linear` skill sets it at creation. No `LINEAR_DEFAULT_PROJECT_*` env is read yet; a soft per-repo default may be added later.

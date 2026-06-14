@@ -2,7 +2,7 @@
 
 An opinionated, **deterministic** software development workflow for Claude Code. It encodes a documented engineering philosophy as an executable method - determinism comes from the [Workflow tool](https://code.claude.com/docs/en/workflows) (JS control flow), not from probabilistic skill-triggering.
 
-> **Status: core built.** The build workflow (role-isolated TDD), `plan-feature`, `write-adr`, the `linear` seam, the `/implement` orchestrator, and the CI review action (`review-diff` skill + `templates/ci-review.yml`) are implemented; the build core is dogfood-proven end-to-end. Remaining: prove the draft-PR slice on a repo with a remote, publish. Build order is in the authoring vault project `Dev Workflow Plugin`.
+> **Status: core built.** The build workflow (role-isolated TDD), `plan-feature`, `write-adr`, the `linear` plugin, the `/implement` orchestrator, and the CI review action (`review-diff` skill + `templates/ci-review.yml`) are implemented; the build core is dogfood-proven end-to-end. Remaining: prove the draft-PR slice on a repo with a remote, publish. Build order is in the authoring vault project `Dev Workflow Plugin`.
 
 ## What it does
 

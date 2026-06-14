@@ -16,7 +16,7 @@ command composes them. If `$1` (the ticket id) is missing, ask for it.
 ## Preconditions (check first, fail clearly)
 
 1. **Linear seam config + workspace safety** — run the config/safety check from the
-   `linear:seam` skill before any MCP touchpoint. If the MCP is on the wrong workspace,
+   `linear:linear` skill before any MCP touchpoint. If the MCP is on the wrong workspace,
    stop.
 2. **Clean working tree** — `git status` clean (or stash/commit first). Never start on a
    dirty tree.
@@ -27,7 +27,7 @@ command composes them. If `$1` (the ticket id) is missing, ask for it.
 
 ## Phase 1 — Ingest
 
-Use `linear:seam` **get-ticket** to read the ticket AND all its comments. Summarise the
+Use `linear:linear` **get-ticket** to read the ticket AND all its comments. Summarise the
 intent and the constraints the comments add.
 
 ## Phase 2 — Plan (+ known ADRs)  ►► GATE ◄◄
@@ -44,10 +44,10 @@ approval, flip ratified ADRs to `accepted`. Revise on feedback.
 
 ## Phase 3 — Branch + baseline
 
-- Branch name from `linear:seam` **branch-name** (`<TICKET>-<slug>`); create the feature
+- Branch name from `linear:linear` **branch-name** (`<TICKET>-<slug>`); create the feature
   branch (github-flow standard; never work on main).
 - **Baseline commit** the approved plan file + ADRs (`type(scope): desc`).
-- `linear:seam` **set-status** → in-progress.
+- `linear:linear` **set-status** → in-progress.
 
 ## Phase 4 — Build (headless, role-isolated)
 
@@ -74,7 +74,7 @@ Handle the return `status`:
   surface the evidence; fix the plan or the blocker and re-run. Do not paper over a failed
   gate.
 
-For reversible decisions the build logs work-log comments via `linear:seam` **comment**
+For reversible decisions the build logs work-log comments via `linear:linear` **comment**
 (best-effort; headless MCP may be absent — it logs and continues).
 
 ## Phase 5 — Review
@@ -95,7 +95,7 @@ every subsequent push.
 - Push the branch (only after `make check` green).
 - Open a **DRAFT** PR (soft, reversible publish): title `<TICKET>: <summary>`, body =
   Summary / Testing / Related with `Closes: <TICKET>` (github-flow PR-body standard).
-- `linear:seam` **link-PR** (attach PR to ticket) and **set-status** → in-review.
+- `linear:linear` **link-PR** (attach PR to ticket) and **set-status** → in-review.
 - **GATE:** CI review runs on the draft. When the human is satisfied, they **mark the PR
   ready-for-review** (the firmer gate). The pipeline stops here — deployment is separate
   and not owned by this plugin.
