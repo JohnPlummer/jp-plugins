@@ -1,13 +1,14 @@
 ---
-name: setup
+name: onboard-repo
 description: |
   Onboard a repo to dev-workflow + linear in one idempotent, interactive pass: register the
   linear-server MCP, write Linear routing into committed .claude/settings.json, scaffold the
   Makefile target contract, create docs/plans + docs/decisions, and optionally add the CI
   review workflow. Use on a fresh repo before /implement, or to repair a partially-set-up one.
+  Invoked by the /setup command.
 ---
 
-# setup (onboard a repo)
+# onboard-repo
 
 Get a repo ready for `/implement`. Idempotent: check each piece, add only what is missing,
 confirm before writing. Run from the target repo (everything happens in the current repo).

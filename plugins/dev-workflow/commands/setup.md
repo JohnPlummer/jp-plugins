@@ -6,7 +6,7 @@ argument-hint: ""
 # /setup
 
 Get the current repo ready for `/implement` in one idempotent, interactive pass via the
-`setup` skill:
+`onboard-repo` skill:
 
 1. Register the `linear-server` MCP if missing.
 2. Write Linear routing (team/workspace/prefix, optional default project) into the committed `.claude/settings.json`.
