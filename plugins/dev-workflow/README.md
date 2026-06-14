@@ -2,7 +2,7 @@
 
 An opinionated, **deterministic** software development workflow for Claude Code. It encodes a documented engineering philosophy as an executable method — determinism comes from the [Workflow tool](https://code.claude.com/docs/en/workflows) (JS control flow), not from probabilistic skill-triggering.
 
-> **Status: scaffold (Phase 0).** Commands, skills, the build workflow, and templates are skeletons. Build order is in the authoring vault project `Dev Workflow Plugin`.
+> **Status: core built.** The build workflow (role-isolated TDD), `plan-feature`, `write-adr`, the `linear` seam, and the `/implement` orchestrator are implemented; the build core is dogfood-proven. Remaining: end-to-end dogfood on a real ticket, CI review action, publish. Build order is in the authoring vault project `Dev Workflow Plugin`.
 
 ## What it does
 

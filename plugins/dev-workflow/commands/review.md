@@ -5,9 +5,7 @@ argument-hint: "[PR-number]"
 
 # /review [PR-number]
 
-> **STATUS: SKELETON (Phase 0).** Built in project Phase 4/5; wraps the existing `code-review` skill.
-
-Diff-oriented review — reviews whatever is in the diff regardless of authorship (plugin-built or hand-coded). One engine, three triggers:
+Diff-oriented review (wraps the `code-review` skill) — reviews whatever is in the diff regardless of authorship (plugin-built or hand-coded). One engine, three triggers:
 
 - `/implement` phase 5 — reviews the code it just built
 - `/review` standalone (local) — reviews your manual changes before pushing
