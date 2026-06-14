@@ -26,6 +26,7 @@ See [`docs/philosophy.md`](./docs/philosophy.md).
 
 ## Commands
 
+- `/setup` - onboard the current repo (linear-server MCP, Linear routing in committed `.claude/settings.json`, Makefile contract, `docs/plans` + `docs/decisions`, optional CI review). Idempotent; run once per repo before `/implement`.
 - `/implement <TICKET>` - primary orchestrator (chains all phases + human gates).
 - `/plan <TICKET>` - ticket -> thin committed plan file with BDD acceptance criteria.
 - `/build <TICKET> <PLAN-PATH>` - run the role-isolated TDD workflow on an approved plan.

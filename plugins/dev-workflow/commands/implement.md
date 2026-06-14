@@ -15,6 +15,9 @@ command composes them. If `$1` (the ticket id) is missing, ask for it.
 
 ## Preconditions (check first, fail clearly)
 
+If several of these are unmet, the repo hasn't been onboarded — run `/setup` first, which
+handles all of them in one pass.
+
 1. **Linear seam config + workspace safety** — run the config/safety check from the
    `linear:linear` skill before any MCP touchpoint. If the MCP is on the wrong workspace,
    stop.
