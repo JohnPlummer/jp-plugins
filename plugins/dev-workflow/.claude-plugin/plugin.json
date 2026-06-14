@@ -1,0 +1,13 @@
+{
+  "name": "dev-workflow",
+  "description": "Opinionated, deterministic software development workflow. Encodes a documented engineering philosophy (separation of judgment, testable-by-default, small reversible changes) as an executable method via the Workflow tool: Linear ticket -> repo plan -> MADR ADRs -> role-isolated TDD -> diff-oriented review -> draft PR.",
+  "author": {
+    "name": "John Plummer"
+  },
+  "dependencies": [
+    {
+      "name": "linear",
+      "version": "^1.0"
+    }
+  ]
+}

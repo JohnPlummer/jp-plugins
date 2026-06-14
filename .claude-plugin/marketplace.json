@@ -1,0 +1,18 @@
+{
+  "name": "jp",
+  "owner": {
+    "name": "John Plummer"
+  },
+  "plugins": [
+    {
+      "name": "dev-workflow",
+      "source": "./plugins/dev-workflow",
+      "description": "Opinionated, deterministic SDLC: Linear ticket -> repo plan -> MADR ADRs -> role-isolated TDD (test-author != implementer != judge) -> diff-oriented review -> draft PR. Determinism via the Workflow tool, not skill-triggering."
+    },
+    {
+      "name": "linear",
+      "source": "./plugins/linear",
+      "description": "Linear tracker capability: read ticket, set status, branch naming, link PR, work-log comments. Consumed by dev-workflow as a native dependency."
+    }
+  ]
+}

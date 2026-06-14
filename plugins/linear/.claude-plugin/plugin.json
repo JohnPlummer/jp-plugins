@@ -1,0 +1,8 @@
+{
+  "name": "linear",
+  "version": "1.0.0",
+  "description": "Linear tracker capability behind one narrow seam (~5 touchpoints: get-ticket, set-status, branch-name, link-PR, comment). Consumed by dev-workflow as a native dependency; usable standalone.",
+  "author": {
+    "name": "John Plummer"
+  }
+}
