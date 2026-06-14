@@ -5,12 +5,12 @@ argument-hint: "[PR-number] [--heavy]"
 
 # /review [PR-number] [--heavy]
 
-Diff-oriented review — reviews whatever is in the diff regardless of authorship
+Diff-oriented review - reviews whatever is in the diff regardless of authorship
 (plugin-built or hand-coded). One engine, three triggers:
 
-- `/implement` phase 5 — reviews the code it just built
-- `/review` standalone (local) — reviews your manual changes before pushing
-- CI action — reviews any PR diff (see below)
+- `/implement` phase 5 - reviews the code it just built
+- `/review` standalone (local) - reviews your manual changes before pushing
+- CI action - reviews any PR diff (see below)
 
 Applies the plugin's philosophy + the resolved standards cascade (external folder/repo ->
 repo, repo wins). The shared criteria live in the **`review-diff`** skill.
@@ -20,7 +20,7 @@ repo, repo wins). The shared criteria live in the **`review-diff`** skill.
 - **Default (light):** run the `review-diff` skill on the current diff (or the given PR).
   Single-pass, standards-aware, prints findings by severity; offers fixes, never auto-applies.
 - **`--heavy`:** the full Workflow-driven multi-agent separation-of-judgment review (wraps
-  `code-review`) — can apply fixes. Local only; the Workflow tool is unavailable in CI.
+  `code-review`) - can apply fixes. Local only; the Workflow tool is unavailable in CI.
 
 ## CI
 

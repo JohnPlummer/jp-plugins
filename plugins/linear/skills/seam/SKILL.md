@@ -12,12 +12,13 @@ description: |
 
 Exactly five touchpoints, no more (YAGNI). Four wrap the `linear-server` MCP; one
 (branch-name) is a deterministic script. A future Jira/GitHub tracker would implement the
-same five behind the same names — keeping the swap contained.
+same five behind the same names - keeping the swap contained.
 
 ## Config + safety (run once per session, before any MCP touchpoint)
 
-Routing comes from the environment (the native config cascade: project
-`.claude/settings.json` `env` overrides user `~/.claude/settings.json`):
+Routing comes from the environment. Set it in `<repo>/.claude/settings.local.json` `env`
+(local, gitignored - never committed; see the plugin README "Setup" for why and the exact
+keys). Claude Code injects those keys into the tool environment, so:
 
 ```
 echo "workspace=$LINEAR_WORKSPACE team=$LINEAR_DEFAULT_TEAM_NAME id=$LINEAR_DEFAULT_TEAM_ID prefix=$LINEAR_DEFAULT_TEAM_PREFIX"
@@ -26,7 +27,7 @@ echo "workspace=$LINEAR_WORKSPACE team=$LINEAR_DEFAULT_TEAM_NAME id=$LINEAR_DEFA
 If unset, stop and tell the user to add the Linear binding (same env contract as the
 standalone `linear` skill). **Workspace safety:** call `mcp__linear-server__get_team` with
 `$LINEAR_DEFAULT_TEAM_ID`; if it 404s or the name differs from `$LINEAR_WORKSPACE`/
-`$LINEAR_DEFAULT_TEAM_NAME`, the MCP is on the wrong workspace — stop, do not write.
+`$LINEAR_DEFAULT_TEAM_NAME`, the MCP is on the wrong workspace - stop, do not write.
 
 **Headless caveat:** `linear-server` is an OAuth HTTP MCP and may be ABSENT in headless /
 cron runs. Touchpoints that run inside the headless build (set-status, comment) must be
@@ -44,7 +45,7 @@ Read the ticket AND all its comments before anything else (ticket-workflow stand
 
 ### 2. set-status(id, targetStatus)
 
-Never hardcode state names — resolve at runtime.
+Never hardcode state names - resolve at runtime.
 
 - `mcp__linear-server__list_issue_statuses` for the team to find the state matching the
   intended stage (e.g. "In Progress", "In Review", "Done").
@@ -73,12 +74,12 @@ Two directions:
 
 ### 5. comment(id, text)
 
-Work-log comments — decisions, failures, options (ticket-workflow audit intent).
+Work-log comments - decisions, failures, options (ticket-workflow audit intent).
 
 - `mcp__linear-server__save_comment` (issueId, body).
 
 ## What this seam is NOT
 
 - Not a generic tracker interface (Linear-specific v1).
-- Not ticket creation / triage / label management — that's the standalone `linear` skill.
+- Not ticket creation / triage / label management - that's the standalone `linear` skill.
 - Not a place for the plan document (the plan lives in the repo; the ticket only references it).
