@@ -20,9 +20,11 @@ directly.
 
 ## Config + workspace safety (run once per session, before any MCP touchpoint)
 
-Routing is read from the environment. Set it in `<repo>/.claude/settings.local.json` `env`
-(local, gitignored, never committed - see the plugin README "Setup"). Claude Code injects
-those keys, so:
+Routing is read from the environment. Set it in the repo's committed `.claude/settings.json`
+`env` - it is shared repo config (the team/workspace/project are the same for everyone on the
+repo), and nothing here is secret (auth is OAuth via the MCP, no token is stored). Use
+`settings.local.json` only for a personal per-machine override. Claude Code injects those
+keys, so:
 
 ```
 echo "workspace=$LINEAR_WORKSPACE team=$LINEAR_DEFAULT_TEAM_NAME id=$LINEAR_DEFAULT_TEAM_ID prefix=$LINEAR_DEFAULT_TEAM_PREFIX"
@@ -41,7 +43,7 @@ Pass `$LINEAR_DEFAULT_TEAM_NAME` (or `$LINEAR_DEFAULT_TEAM_ID`) wherever an exam
 team. Issue identifiers are `$LINEAR_DEFAULT_TEAM_PREFIX-<number>` (shown as `<PREFIX>-<n>`).
 
 **Optional default project.** A repo may set `LINEAR_DEFAULT_PROJECT_ID` (and
-`LINEAR_DEFAULT_PROJECT_NAME` for readability) in the same `settings.local.json`. When set,
+`LINEAR_DEFAULT_PROJECT_NAME` for readability) in the same `.claude/settings.json`. When set,
 new tickets default to that project (see Projects). Leave it unset for a monorepo serving
 several projects. It is a soft default, always overridable per ticket - never a hard binding.
 
@@ -129,7 +131,7 @@ one project can span an API repo and a web-app repo), so never derive project fr
 repo from project.
 
 **Soft per-repo default.** Most repos do have one primary project, so a repo may set
-`$LINEAR_DEFAULT_PROJECT_ID` (+ `$LINEAR_DEFAULT_PROJECT_NAME`) in its `settings.local.json`.
+`$LINEAR_DEFAULT_PROJECT_ID` (+ `$LINEAR_DEFAULT_PROJECT_NAME`) in its `.claude/settings.json`.
 When set, new tickets default to it (pass it as the `project` param; if `save_issue` wants a
 name rather than an id, resolve via `list_projects`). Always overridable per ticket, and left
 unset for a monorepo. It is a creation convenience only - it never selects the repo to build

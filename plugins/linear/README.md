@@ -15,13 +15,13 @@ dev-workflow uses exactly five operations from the `linear` skill, the stable co
 
 ## Setup
 
-Routing is read from the environment as `$LINEAR_*` keys. Put them in **`<repo>/.claude/settings.local.json`** under `env` - local, gitignored, never committed. Claude Code injects `settings.local.json` `env` into the tool environment, so `$LINEAR_*` resolves in the skill's bash checks.
+Routing is read from the environment as `$LINEAR_*` keys. Put them in the repo's **committed `.claude/settings.json`** under `env`. Claude Code injects them into the tool environment, so `$LINEAR_*` resolves in the skill's bash checks.
 
-Use the **local** layer, not user or committed project settings:
+Commit it, don't hide it in `settings.local.json`:
 
-- Not user `~/.claude/settings.json` - where `~/.claude` is a symlink into a config repo that gets pushed (a common setup), user settings would commit your routing.
-- Not committed project `.claude/settings.json` - that lands in the repo's history (and a public repo) for everyone.
-- The cascade is Managed > **Local (`settings.local.json`)** > Project (`settings.json`) > User, so local wins over committed project settings.
+- The team, workspace, prefix, and default project are facts about the repo, the same for everyone who clones it - shared, versioned config, not a per-developer choice.
+- Nothing here is secret. Auth is OAuth via the `linear-server` MCP (see Auth), so no token is ever committed; these keys are just routing identifiers.
+- Use `settings.local.json` only for a genuine per-machine override (rare). The cascade is Managed > Local (`settings.local.json`) > Project (`settings.json`) > User, so a local override still wins when you need one.
 
 | Key | What | Example |
 |---|---|---|
@@ -32,7 +32,7 @@ Use the **local** layer, not user or committed project settings:
 | `LINEAR_DEFAULT_PROJECT_ID` | *optional* - default project for new tickets | `8db96294-…` |
 | `LINEAR_DEFAULT_PROJECT_NAME` | *optional* - readable name for the above | `Get Out More` |
 
-Example `<repo>/.claude/settings.local.json`:
+Example `<repo>/.claude/settings.json`:
 
 ```json
 {
@@ -47,7 +47,7 @@ Example `<repo>/.claude/settings.local.json`:
 }
 ```
 
-Each repo points at its own team via its own `settings.local.json`. The two project keys are optional - set them for a repo with one primary project, omit them for a monorepo serving several.
+Each repo points at its own team via its own committed `.claude/settings.json`. The two project keys are optional - set them for a repo with one primary project, omit them for a monorepo serving several.
 
 ## Auth
 
@@ -59,4 +59,4 @@ Linear hierarchy is team (required) -> project (optional) -> issue. This plugin 
 
 Project is **ticket metadata, not repo config**: it is chosen when a ticket is created and read off the ticket thereafter. Project<->repo is **many-to-many**: a monorepo serves several projects, and one project can span an API repo plus a web-app repo - so project is never derived from the repo or the repo from the project.
 
-That said, most repos have one primary project, so the `linear` skill reads an **optional** `$LINEAR_DEFAULT_PROJECT_ID` from `settings.local.json` and defaults new tickets to it. It is a creation convenience only: always overridable per ticket, left unset for a monorepo, and it never selects which repo to build in. The five contract touchpoints don't need it.
+That said, most repos have one primary project, so the `linear` skill reads an **optional** `$LINEAR_DEFAULT_PROJECT_ID` from the committed `.claude/settings.json` and defaults new tickets to it. It is a creation convenience only: always overridable per ticket, left unset for a monorepo, and it never selects which repo to build in. The five contract touchpoints don't need it.
