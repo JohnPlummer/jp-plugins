@@ -5,12 +5,17 @@ argument-hint: "<decision title>"
 
 # /adr "<decision title>"
 
-> **STATUS: SKELETON (Phase 0).** Built in project Phase 2 (`write-adr` skill).
+Standalone ADR writer. Invoke the **`write-adr`** skill to create a MADR 4.0.0 record in
+the target repo's `docs/decisions/`:
 
-Standalone ADR writer. Creates a MADR 4.0.0 record in the target repo's `docs/decisions/`:
-
-- filename `NNNN-title-with-dashes.md` (consecutive 4-digit, auto-scanned next number)
+- filename `NNNN-title-with-dashes.md` (consecutive 4-digit, deterministically numbered by `scripts/adr.sh`)
 - template: status / date / deciders frontmatter + Context and Problem Statement + Decision Drivers + Considered Options + Decision Outcome + Consequences
 - status lifecycle: `proposed -> accepted -> (deprecated | superseded by ADR-NNNN)`; `rejected` for options not taken
+- regenerates `docs/decisions/README.md` (the ADR index)
 
-Most ADRs are discovered during build and emitted by the build workflow; this command is for writing one by hand.
+Pass the decision title from the command argument. If no repo is obvious from context, ask
+which repo. Then follow the `write-adr` skill process: create the file, fill the body, set
+status.
+
+Most ADRs are discovered during build and emitted by the build workflow; this command is
+for writing one by hand.
