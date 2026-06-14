@@ -40,6 +40,11 @@ never proceed when the check fails.
 Pass `$LINEAR_DEFAULT_TEAM_NAME` (or `$LINEAR_DEFAULT_TEAM_ID`) wherever an example shows a
 team. Issue identifiers are `$LINEAR_DEFAULT_TEAM_PREFIX-<number>` (shown as `<PREFIX>-<n>`).
 
+**Optional default project.** A repo may set `LINEAR_DEFAULT_PROJECT_ID` (and
+`LINEAR_DEFAULT_PROJECT_NAME` for readability) in the same `settings.local.json`. When set,
+new tickets default to that project (see Projects). Leave it unset for a monorepo serving
+several projects. It is a soft default, always overridable per ticket - never a hard binding.
+
 ## Concept mapping
 
 | Concept | Linear entity | MCP tool |
@@ -88,7 +93,7 @@ are left unchanged.
 
 | Operation | Tool + key params |
 |---|---|
-| Create issue | `save_issue` (title, team, description, state, priority, labels, project, assignee) |
+| Create issue | `save_issue` (title, team, description, state, priority, labels, project, assignee). If the caller gives no project and `$LINEAR_DEFAULT_PROJECT_ID` is set, default `project` to it (note which project you applied; let the user override). |
 | View issue | `get_issue` (id, includeRelations: true) |
 | Update issue | `save_issue` (id + changed fields) |
 | Add comment | `save_comment` (issueId, body) |
@@ -122,6 +127,13 @@ not the initiative layer above them. Project is chosen at creation (`project` pa
 off the ticket thereafter. Project<->repo is many-to-many (a monorepo serves several projects;
 one project can span an API repo and a web-app repo), so never derive project from repo or
 repo from project.
+
+**Soft per-repo default.** Most repos do have one primary project, so a repo may set
+`$LINEAR_DEFAULT_PROJECT_ID` (+ `$LINEAR_DEFAULT_PROJECT_NAME`) in its `settings.local.json`.
+When set, new tickets default to it (pass it as the `project` param; if `save_issue` wants a
+name rather than an id, resolve via `list_projects`). Always overridable per ticket, and left
+unset for a monorepo. It is a creation convenience only - it never selects the repo to build
+in, and the build/consume flow still reads the project off the ticket.
 
 ## dev-workflow contract (the five touchpoints)
 

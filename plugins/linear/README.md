@@ -29,6 +29,8 @@ Use the **local** layer, not user or committed project settings:
 | `LINEAR_DEFAULT_TEAM_ID` | team UUID (the safety check) | `537fb028-…` |
 | `LINEAR_DEFAULT_TEAM_NAME` | team name | `JP` |
 | `LINEAR_DEFAULT_TEAM_PREFIX` | issue ID prefix | `JP` (-> `JP-123`) |
+| `LINEAR_DEFAULT_PROJECT_ID` | *optional* - default project for new tickets | `8db96294-…` |
+| `LINEAR_DEFAULT_PROJECT_NAME` | *optional* - readable name for the above | `Get Out More` |
 
 Example `<repo>/.claude/settings.local.json`:
 
@@ -38,12 +40,14 @@ Example `<repo>/.claude/settings.local.json`:
     "LINEAR_WORKSPACE": "personal-jpp",
     "LINEAR_DEFAULT_TEAM_ID": "537fb028-288f-4ee9-928e-d2457d27746c",
     "LINEAR_DEFAULT_TEAM_NAME": "JP",
-    "LINEAR_DEFAULT_TEAM_PREFIX": "JP"
+    "LINEAR_DEFAULT_TEAM_PREFIX": "JP",
+    "LINEAR_DEFAULT_PROJECT_ID": "8db96294-0e6c-4a3f-bc6c-3f7826d2abc5",
+    "LINEAR_DEFAULT_PROJECT_NAME": "Get Out More"
   }
 }
 ```
 
-Each repo points at its own team via its own `settings.local.json`.
+Each repo points at its own team via its own `settings.local.json`. The two project keys are optional - set them for a repo with one primary project, omit them for a monorepo serving several.
 
 ## Auth
 
@@ -53,4 +57,6 @@ OAuth via the `linear-server` MCP - there is **no Linear token to store**. On fi
 
 Linear hierarchy is team (required) -> project (optional) -> issue. This plugin uses **projects, not initiatives** (the layer above projects - unneeded for a single team).
 
-Project is **ticket metadata, not repo config**: it is chosen when a ticket is created and read off the ticket thereafter. Project<->repo is **many-to-many**: a monorepo serves several projects, and one project can span an API repo plus a web-app repo - so project is never derived from the repo or the repo from the project. The five contract touchpoints don't need it; the `linear` skill sets it at creation. No `LINEAR_DEFAULT_PROJECT_*` env is read yet; a soft per-repo default may be added later.
+Project is **ticket metadata, not repo config**: it is chosen when a ticket is created and read off the ticket thereafter. Project<->repo is **many-to-many**: a monorepo serves several projects, and one project can span an API repo plus a web-app repo - so project is never derived from the repo or the repo from the project.
+
+That said, most repos have one primary project, so the `linear` skill reads an **optional** `$LINEAR_DEFAULT_PROJECT_ID` from `settings.local.json` and defaults new tickets to it. It is a creation convenience only: always overridable per ticket, left unset for a monorepo, and it never selects which repo to build in. The five contract touchpoints don't need it.
