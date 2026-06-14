@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# adr.sh — deterministic MADR file mechanics for the write-adr skill.
+# adr.sh - deterministic MADR file mechanics for the adr skill.
 # Zero runtime deps (POSIX tools + awk) so it works in any repo, not just node.
 #
 # Usage:

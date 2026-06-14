@@ -1,5 +1,5 @@
 ---
-name: review-diff
+name: review
 description: |
   Single-pass, standards-aware, diff-oriented code review. Reviews whatever is in the
   diff regardless of author (plugin-built or hand-written) against the plugin philosophy
@@ -8,7 +8,7 @@ description: |
   separation-of-judgment review (that is the build workflow's Review phase, local-only).
 ---
 
-# review-diff (the diff-oriented review engine)
+# review (the diff-oriented review engine)
 
 One review engine, three triggers - same philosophy and standards everywhere:
 

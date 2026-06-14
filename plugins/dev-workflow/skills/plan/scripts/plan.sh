@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# plan.sh — deterministic plan-file mechanics for the plan-feature skill.
+# plan.sh - deterministic plan-file mechanics for the plan skill.
 # Zero runtime deps (POSIX tools + awk) so it works in any repo.
 #
 # Usage:

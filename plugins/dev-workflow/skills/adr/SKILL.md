@@ -1,5 +1,5 @@
 ---
-name: write-adr
+name: adr
 description: |
   Write a MADR 4.0.0 architecture decision record into the target repo's docs/decisions/.
   Use when a significant, hard-to-reverse decision needs recording, or when the build
@@ -8,7 +8,7 @@ description: |
   decisions (reversible chose-A-over-B notes) -- those go to Linear comments.
 ---
 
-# write-adr
+# adr
 
 Create a MADR 4.0.0 ADR in the target repo. The mechanics (consecutive 4-digit
 numbering, filename slug, frontmatter date, index regeneration) are deterministic and
@@ -34,7 +34,7 @@ Linear comments, per the ticket-workflow standard.
    regenerates the index, then prints the path):
 
    ```sh
-   "$CLAUDE_PLUGIN_ROOT/skills/write-adr/scripts/adr.sh" new \
+   "$CLAUDE_PLUGIN_ROOT/skills/adr/scripts/adr.sh" new \
      --repo <repo-path> \
      --title "<short decision title>" \
      [--status proposed|accepted] \
@@ -59,7 +59,7 @@ Linear comments, per the ticket-workflow standard.
 5. **Regenerate the index** if you edited a title/status after creation:
 
    ```sh
-   "$CLAUDE_PLUGIN_ROOT/skills/write-adr/scripts/adr.sh" index --repo <repo-path>
+   "$CLAUDE_PLUGIN_ROOT/skills/adr/scripts/adr.sh" index --repo <repo-path>
    ```
 
 ## Status lifecycle

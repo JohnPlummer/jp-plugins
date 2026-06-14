@@ -1,4 +1,4 @@
-# Plan — {TICKET}: {feature title}
+# Plan - {TICKET}: {feature title}
 
 {One-line summary of the change.}
 
@@ -8,7 +8,7 @@
 ## Approach
 
 {Coarse approach and the vertical slices, in a few sentences. Prefer the smallest
-in-slice diff. This is NOT implementation or architecture design — that emerges during
+in-slice diff. This is NOT implementation or architecture design - that emerges during
 the build (red -> green -> refactor). Only behaviour is fixed here.}
 
 ## Work items
@@ -17,7 +17,7 @@ Each item below becomes one red -> green -> refactor -> judge cycle in the build
 The build reads each item's id (the `### {TICKET}-x` heading), its short desc, and its
 **Spec** block (the acceptance criteria the test-author works from).
 
-### {TICKET}-a — {short desc}
+### {TICKET}-a - {short desc}
 
 {Optional one-line context.}
 
@@ -36,11 +36,11 @@ Out of scope (YAGNI): {what this item explicitly does not do}
 
 ## Known decisions (proposed ADRs)
 
-{ONLY decisions already forced before any code — e.g. "uses Linear", "lives in bounded
+{ONLY decisions already forced before any code - e.g. "uses Linear", "lives in bounded
 context X". Most decisions are discovered during the build, not here. One line each;
-the actual ADR file goes in docs/decisions/ via the write-adr skill, status `proposed`.}
+the actual ADR file goes in docs/decisions/ via the adr skill, status `proposed`.}
 
-- ADR-{NNNN}: {title} (proposed) — {one-line rationale}
+- ADR-{NNNN}: {title} (proposed) - {one-line rationale}
 
 ## Notes
 

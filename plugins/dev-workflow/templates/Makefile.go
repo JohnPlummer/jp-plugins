@@ -1,4 +1,4 @@
-# Reference Makefile (Go) — implements the dev-workflow target contract.
+# Reference Makefile (Go) - implements the dev-workflow target contract.
 # Standard: ~/.claude/standards/workflow/makefile-targets.md
 # Copy into a Go repo and wire the tooling behind each target. The dev-workflow
 # plugin invokes these targets by name; the repo decides the toolchain.
@@ -39,7 +39,7 @@ lint:
 	@golangci-lint run ./...
 
 # ── Tests ────────────────────────────────────────────────────────────────────
-test-unit: mocks ## fast unit tests — red/green inner loop
+test-unit: mocks ## fast unit tests - red/green inner loop
 	@ginkgo run --label-filter="unit" ./...
 
 test-integration:

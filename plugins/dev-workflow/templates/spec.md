@@ -1,4 +1,4 @@
-# Spec — {feature / work item}
+# Spec - {feature / work item}
 
 The spec is the contract the test-author works from. Only behaviour is fixed up front;
 implementation and architecture emerge in red -> green -> refactor.
@@ -20,4 +20,4 @@ implementation and architecture emerge in red -> green -> refactor.
 
 ## Notes for the implementer
 
-- {constraints, edge cases, data shapes — only what the spec genuinely requires}
+- {constraints, edge cases, data shapes - only what the spec genuinely requires}

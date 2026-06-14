@@ -2,7 +2,7 @@
 
 An opinionated, **deterministic** software development workflow for Claude Code. It encodes a documented engineering philosophy as an executable method - determinism comes from the [Workflow tool](https://code.claude.com/docs/en/workflows) (JS control flow), not from probabilistic skill-triggering.
 
-> **Status: core built.** The build workflow (role-isolated TDD), `plan-feature`, `write-adr`, the `linear` plugin, the `/implement` orchestrator, and the CI review action (`review-diff` skill + `templates/ci-review.yml`) are implemented; the build core is dogfood-proven end-to-end. Remaining: prove the draft-PR slice on a repo with a remote, publish. Build order is in the authoring vault project `Dev Workflow Plugin`.
+> **Status: core built.** The build workflow (role-isolated TDD), `plan`, `adr`, the `linear` plugin, the `/implement` orchestrator, and the CI review action (`review` skill + `templates/ci-review.yml`) are implemented; the build core is dogfood-proven end-to-end. Remaining: prove the draft-PR slice on a repo with a remote, publish. Build order is in the authoring vault project `Dev Workflow Plugin`.
 
 ## What it does
 
@@ -24,7 +24,9 @@ The pipeline ends at a **draft PR**, not a deploy - hence `/implement`, not `/sh
 
 See [`docs/philosophy.md`](./docs/philosophy.md).
 
-## Commands
+## Skills
+
+Each phase is a skill, invoked by name (`/setup`, or namespaced `/dev-workflow:setup`). The heavy, side-effecting ones (`implement`, `build`, `setup`) are explicit-only (`disable-model-invocation`); the lighter ones (`plan`, `adr`, `review`) may also auto-trigger when you describe the task. There are no separate command wrappers - commands are merged into skills in Claude Code.
 
 - `/setup` - onboard the current repo (linear-server MCP, Linear routing in committed `.claude/settings.json`, Makefile contract, `docs/plans` + `docs/decisions`, optional CI review). Idempotent; run once per repo before `/implement`.
 - `/implement <TICKET>` - primary orchestrator (chains all phases + human gates).
@@ -37,7 +39,7 @@ See [`docs/philosophy.md`](./docs/philosophy.md).
 
 CI cannot run the Workflow tool, so the deterministic multi-agent build/review core is
 local-only. CI gets a **single-pass, standards-aware, diff-oriented** review via the
-`review-diff` skill running on [`anthropics/claude-code-action@v1`](https://code.claude.com/docs/en/github-actions):
+`review` skill running on [`anthropics/claude-code-action@v1`](https://code.claude.com/docs/en/github-actions):
 the action installs this plugin (philosophy travels), checks out your external standards
 repo, and posts inline comments on every PR. Run the heavy separation-of-judgment review
 locally before you push.

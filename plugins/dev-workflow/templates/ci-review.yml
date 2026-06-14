@@ -1,9 +1,9 @@
-# dev-workflow CI review — single-pass, standards-aware, diff-oriented.
+# dev-workflow CI review - single-pass, standards-aware, diff-oriented.
 #
 # Drop this into `.github/workflows/` in the repo you want reviewed. It runs the
-# dev-workflow `review-diff` skill on every PR via anthropics/claude-code-action@v1,
+# dev-workflow `review` skill on every PR via anthropics/claude-code-action@v1,
 # posting findings as inline comments. The deterministic multi-agent build/review core
-# (the Workflow tool) is NOT available in CI — this is the single-pass entry point. Run the
+# (the Workflow tool) is NOT available in CI - this is the single-pass entry point. Run the
 # heavy separation-of-judgment review locally before you push.
 #
 # Setup:
@@ -26,7 +26,7 @@ permissions:
 
 jobs:
   review:
-    # Review on ready-for-review, not on drafts — matches the draft -> mark-ready gate.
+    # Review on ready-for-review, not on drafts - matches the draft -> mark-ready gate.
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     env:
@@ -52,8 +52,8 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           plugin_marketplaces: "https://github.com/JohnPlummer/jp-plugins.git"
           plugins: "dev-workflow@jp"
-          prompt: "/dev-workflow:review-diff ${{ github.repository }}/pull/${{ github.event.pull_request.number }}"
+          prompt: "/dev-workflow:review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}"
           claude_args: "--max-turns 20"
         env:
-          # The review-diff skill reads this to find the checked-out external standards.
+          # The review skill reads this to find the checked-out external standards.
           DEV_WORKFLOW_STANDARDS_PATH: ${{ env.STANDARDS_PATH }}

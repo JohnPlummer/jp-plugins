@@ -26,7 +26,7 @@ informed: {list everyone kept up-to-date on progress; one-way communication}
 
 ## Decision Outcome
 
-Chosen option: "{title of option 1}", because {justification — e.g. only option which meets a knock-out criterion / resolves a force / ... / comes out best (see below)}.
+Chosen option: "{title of option 1}", because {justification - e.g. only option which meets a knock-out criterion / resolves a force / ... / comes out best (see below)}.
 
 ### Consequences
 
