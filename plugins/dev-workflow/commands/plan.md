@@ -5,9 +5,9 @@ argument-hint: <TICKET-ID>
 
 # /plan <TICKET-ID>
 
-> **STATUS: SKELETON (Phase 0).** Built in project Phase 3 (`plan-feature` skill).
-
-Standalone planning phase. Read the ticket + comments, produce a **thin** plan as a committed repo file `docs/plans/ST-XXX-<feature>.md`:
+Standalone planning phase. Invoke the **`plan-feature`** skill: read the ticket + all
+comments, propose a ceremony tier, and produce a **thin** plan as a committed repo file
+`docs/plans/<TICKET>-<feature>.md`:
 
 - ordered work items (task checklist)
 - per-item BDD acceptance criteria (the spec the test-author works from)
