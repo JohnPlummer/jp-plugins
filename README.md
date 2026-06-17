@@ -18,6 +18,17 @@ Public marketplace (`jp`) for opinionated Claude Code engineering plugins.
 
 `dev-workflow` declares `linear` as a native dependency, so Claude Code auto-installs and enables it from this same marketplace.
 
+## Getting started
+
+After installing, from inside the repo you want to work in:
+
+```text
+/dev-workflow:setup        # onboard the repo once (MCP, Linear routing, Makefile, docs dirs)
+/dev-workflow:implement JP-123   # take a ticket to a draft PR
+```
+
+`/implement` stops at two gates (approve the plan, mark the PR ready) and is otherwise hands-off. See the [`dev-workflow` README](./plugins/dev-workflow) for the full per-phase walkthrough and the [`linear` README](./plugins/linear) for standalone tracker usage.
+
 ## Update
 
 ```text

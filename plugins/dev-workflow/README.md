@@ -15,6 +15,33 @@ review (diff-oriented) -> verify -> draft PR -> [GATE: mark ready]
 
 The pipeline ends at a **draft PR**, not a deploy - hence `/implement`, not `/ship`.
 
+## Quickstart
+
+First time on a repo, onboard it once:
+
+```text
+/dev-workflow:setup
+```
+
+This registers the `linear-server` MCP, writes Linear routing into the repo's committed `.claude/settings.json`, scaffolds the Makefile target contract, and creates `docs/plans` + `docs/decisions`. Idempotent, so re-running only fills gaps.
+
+Then take a ticket to a draft PR:
+
+```text
+/dev-workflow:implement JP-123
+```
+
+A run stops at two human gates and is otherwise hands-off:
+
+1. **Ingest** the ticket and all its comments.
+2. **Plan**: proposes a ceremony tier (light/full) and drafts a thin committed plan file with BDD acceptance criteria. **GATE 1: you approve the plan** before any code.
+3. **Branch + baseline** commit, Linear status to In Progress.
+4. **Build**: role-isolated TDD in a headless Workflow (test-author, implementer and judge are separate subagent contexts). Hard-to-reverse decisions surface as ADRs to ratify, then resume.
+5. **Review** the diff against philosophy + standards, then **verify** (`make check` must pass before any push).
+6. **Draft PR** with `Closes: JP-123`, Linear status to In Review. **GATE 2: you mark it ready for review.**
+
+You can also run any phase standalone instead of letting `/implement` chain them, e.g. `/dev-workflow:plan JP-123` to draft a plan, or `/dev-workflow:review` for a quick pass on uncommitted changes.
+
 ## The opinion (what makes it deterministic, not just nudged)
 
 - **Separation of judgment**: test-author != implementer != completion-judge, each a separate subagent context. The judge evaluates against the spec, not the tests. Enforced by the Workflow, not by prompting.
@@ -31,9 +58,9 @@ Each phase is a skill, invoked by name (`/setup`, or namespaced `/dev-workflow:s
 - `/setup` - onboard the current repo (linear-server MCP, Linear routing in committed `.claude/settings.json`, Makefile contract, `docs/plans` + `docs/decisions`, optional CI review). Idempotent; run once per repo before `/implement`.
 - `/implement <TICKET>` - primary orchestrator (chains all phases + human gates).
 - `/plan <TICKET>` - ticket -> thin committed plan file with BDD acceptance criteria.
-- `/build <TICKET> <PLAN-PATH>` - run the role-isolated TDD workflow on an approved plan.
+- `/build <TICKET> <PLAN-PATH>` - run the role-isolated TDD workflow on an approved plan, e.g. `/build JP-123 docs/plans/JP-123-rate-limiter.md`.
 - `/review [PR] [--heavy]` - diff-oriented review (any author) against philosophy + standards; light single-pass by default, `--heavy` for the local multi-agent pass. Same engine runs in CI.
-- `/adr "<title>"` - write a MADR 4.0.0 ADR.
+- `/adr "<title>"` - write a MADR 4.0.0 ADR, e.g. `/adr "Use Redis for the rate limiter"`.
 
 ## CI review
 

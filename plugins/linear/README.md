@@ -9,6 +9,21 @@ The Linear tracker capability for Claude Code. A full Linear manager, plus the t
 
 Integration is **MCP, not CLI**: the official `linear-server` remote MCP (`https://mcp.linear.app/mcp`, OAuth). `branch-name` is the one deterministic script ([scripts/branch-name.sh](./scripts/branch-name.sh)).
 
+## Usage
+
+Invoke explicitly with `/linear:linear`, or just describe the task and let it trigger. It speaks natural language and resolves IDs, statuses and labels at runtime (no hardcoded taxonomy). Examples:
+
+```text
+/linear:linear create a bug for the rate limiter dropping requests under load
+/linear:linear show me JP-123
+/linear:linear move JP-123 to In Review
+/linear:linear what's assigned to me in the Get Out More project
+/linear:linear add a comment to JP-123 with the rollout plan
+/linear:linear label JP-123 as a bug and set it blocked by JP-120
+```
+
+For new tickets and rewrites it chains to `ticket-composer` for structure, then reads `$LINEAR_DEFAULT_PROJECT_ID` (if set) to default the project. Routing comes from the repo's committed `.claude/settings.json` (see Setup).
+
 ## dev-workflow contract (5 touchpoints)
 
 dev-workflow uses exactly five operations from the `linear` skill, the stable contract between the two plugins: **get-ticket**, **set-status**, **branch-name**, **link-PR**, **comment**. A future Jira/GitHub tracker plugin would implement the same five behind the same names. Inside the headless build, the MCP touchpoints (set-status, comment) are best-effort: if the MCP is absent, log and continue, never fail the build. Full detail in the `linear` skill's contract section.
