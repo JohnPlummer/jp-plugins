@@ -68,9 +68,13 @@ Each repo points at its own team via its own committed `.claude/settings.json`. 
 
 OAuth via the `linear-server` MCP - there is **no Linear token to store**. On first use, OAuth fires against the workspace matching `$LINEAR_WORKSPACE` on that machine. The skill's safety check (`get_team` against `$LINEAR_DEFAULT_TEAM_ID`) refuses to operate if the wrong workspace is authenticated, so it can't write to the wrong place. Secrets are never repo-level.
 
-## Projects
+## Hierarchy
 
-Linear hierarchy is team (required) -> project (optional) -> issue. This plugin uses **projects, not initiatives** (the layer above projects - unneeded for a single team).
+Linear nests **project -> milestone -> issue -> sub-issue** (team is required, the rest optional). Mapping from Jira: product/large workstream -> Project, Epic -> **Milestone**, Story/Task -> Issue, Sub-task -> Sub-issue.
+
+- **Project** = one product or cohesive workstream; gets a lead and a description on creation.
+- **Milestone** = a feature or theme, the planning unit. Plan and review the project board grouped by milestone.
+- **Issue** = a deployable, roughly week-sized chunk under a milestone. Use a parent issue with sub-issues when an epic is one deliverable needing a clickable progress page.
 
 Project is **ticket metadata, not repo config**: it is chosen when a ticket is created and read off the ticket thereafter. Project<->repo is **many-to-many**: a monorepo serves several projects, and one project can span an API repo plus a web-app repo - so project is never derived from the repo or the repo from the project.
 

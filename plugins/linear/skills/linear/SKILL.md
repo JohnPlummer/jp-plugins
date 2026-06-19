@@ -49,10 +49,14 @@ several projects. It is a soft default, always overridable per ticket - never a 
 
 ## Concept mapping
 
-| Concept | Linear entity | MCP tool |
+Linear has no "Epic" object. Map Jira concepts onto Linear's hierarchy
+(project -> milestone -> issue -> sub-issue):
+
+| Jira | Linear entity | MCP tool |
 |---|---|---|
-| Epic | Project | `save_project` |
-| Story/Task | Issue | `save_issue` |
+| Product / large workstream | Project | `save_project` |
+| Epic | Milestone | `save_milestone` |
+| Story / Task | Issue | `save_issue` |
 | Sub-task | Sub-issue | `save_issue` with `parentId` |
 | Comment | Comment | `save_comment` |
 
@@ -103,10 +107,17 @@ are left unchanged.
 | Search (filters) | `list_issues` (team, state, assignee, label, project) |
 | Search (text) | `search` (query, type: "issue") |
 | List sub-tasks | `list_issues` (parentId) |
-| Create project | `save_project` (name, addTeams, description, priority) |
+| Create project | `save_project` (name, addTeams, description, lead, priority). Always set a description and lead - an empty project shell is a smell. `icon` must be a valid Linear icon name, not a Unicode emoji - omit if unsure. |
 | Link to project | `save_issue` (id, project) |
+| Create milestone | `save_milestone` (project, name) |
+| Update milestone | `save_milestone` (id + changed fields) |
+| List milestones | `list_milestones` (project) |
+| Set issue milestone | `save_issue` (id, milestone) |
 | Set parent | `save_issue` (id, parentId) |
 | Block/unblock | `save_issue` (id, blocks/blockedBy arrays; `removeBlocks`/`removeBlockedBy` to remove - append-only) |
+
+`list_issues` with no filter returns only the most-recently-updated set. Pass `team` and
+`limit` for the full set, and page via `cursor` for large results.
 
 ## Creating or rewriting ticket content
 
@@ -122,15 +133,32 @@ create/update:
 Callers that compose their own content (using the ticket-composer templates as reference) may
 call this skill directly to avoid a slow chain.
 
-## Projects, not initiatives
+## Hierarchy and conventions
 
-Linear hierarchy is team (required) -> project (optional) -> issue. This plugin uses projects,
-not the initiative layer above them. Project is chosen at creation (`project` param) and read
-off the ticket thereafter. Project<->repo is many-to-many (a monorepo serves several projects;
-one project can span an API repo and a web-app repo), so never derive project from repo or
-repo from project.
+Linear nests project -> milestone -> issue -> sub-issue. Team is required; the other layers
+are optional.
 
-**Soft per-repo default.** Most repos do have one primary project, so a repo may set
+- **Project** - one product or cohesive workstream. Keep unrelated workstreams in separate
+  projects, not one catch-all. Separate an application from the shared libraries it depends on:
+  the library's development is its own project; the consumer tracks only its integration work.
+  Every project gets a lead and a description on creation - an empty project shell is a smell.
+- **Milestone** - a feature or theme, planned and reviewed as a unit. This is the planning
+  unit. Name it after the outcome (e.g. "Meetup integration"). A milestone has no page of its
+  own; to see its issues, group the project board by milestone.
+- **Issue** - a deployable, roughly week-sized chunk that delivers value on its own. Issues sit
+  under a milestone (set `milestone` on the issue).
+- **Sub-issue** - a child of an issue (one parent each). When an epic is really one deliverable
+  broken into tasks and you want a clickable page with progress, use a parent issue with
+  sub-issues instead of a milestone.
+
+**Plan by milestone.** Group the project board by milestone so each becomes a section with its
+issues underneath, and review progress per milestone.
+
+**project<->repo is many-to-many** (a monorepo serves several projects; one project can span an
+API repo and a web-app repo), so never derive project from repo or repo from project. Project
+is chosen at creation (`project` param) and read off the ticket thereafter.
+
+**Soft per-repo default.** Most repos have one primary project, so a repo may set
 `$LINEAR_DEFAULT_PROJECT_ID` (+ `$LINEAR_DEFAULT_PROJECT_NAME`) in its `.claude/settings.json`.
 When set, new tickets default to it (pass it as the `project` param; if `save_issue` wants a
 name rather than an id, resolve via `list_projects`). Always overridable per ticket, and left
