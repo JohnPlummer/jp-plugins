@@ -71,6 +71,15 @@ runtime with `list_issue_statuses` for the team, since workspaces rename them.
 
 Priority values: 0 None, 1 Urgent, 2 High, 3 Normal, 4 Low.
 
+## Cycles
+
+Where the team runs cycles, cycles are the delivery cadence and projects are the deliverable.
+Issues are scheduled into the current cycle and unfinished work rolls over automatically - both
+are usually the workspace's own cycle settings, so creation does not force a `cycle`. To
+schedule an issue explicitly, resolve the target with `list_cycles` (type=current for the live
+one) and set `cycle` on the issue. Where the workspace does not run cycles, `list_cycles`
+returns none and the field is left untouched.
+
 ## Labels
 
 Discover the taxonomy at runtime - `mcp__linear-server__list_issue_labels` - before assuming
@@ -80,7 +89,7 @@ rules are universal even though each workspace's labels differ:
 1. Every issue gets exactly one **Type** label (e.g. Bug, Feature, Chore, Tech Debt).
 2. Every issue gets at least one **Area** label - the product or surface it touches. This is the
    cross-project spine, since a product is a label here, not a project.
-3. **Concern** labels (Accessibility, Performance, Security, Testing, …) are optional.
+3. **Concern** labels (Security, Performance, Observability, Accessibility) are optional, one or more.
 4. Labels use Title Case unless they match a repo/project name.
 5. Mapping from a ticket file's frontmatter labels: pick the closest existing workspace label.
 
@@ -118,6 +127,8 @@ are left unchanged.
 | List milestones | `list_milestones` (project) |
 | Set issue milestone | `save_issue` (id, milestone) |
 | Set parent | `save_issue` (id, parentId) |
+| List cycles | `list_cycles` (teamId, type: current/previous/next) |
+| Schedule into cycle | `save_issue` (id, cycle - name, number, or ID; resolve "current" via `list_cycles` type=current) |
 | Block/unblock | `save_issue` (id, blocks/blockedBy arrays; `removeBlocks`/`removeBlockedBy` to remove - append-only) |
 
 `list_issues` with no filter returns only the most-recently-updated set. Pass `team` and
@@ -153,9 +164,9 @@ are optional.
   one issue can touch a frontend and a backend repo. Issues sit under a milestone (set `milestone`
   on the issue).
 - **Sub-issue** - a child of an issue (one parent each), the routine one-hour-to-one-day unit of
-  actual work. Break every issue down into sub-issues rather than working at issue level. (A
-  parent issue with sub-issues also serves when you want a clickable deliverable page with
-  progress in place of a milestone.)
+  actual work. Break a larger issue into sub-issues when it needs decomposing. A small issue,
+  such as a single bug, can stand on its own. (A parent issue with sub-issues also serves when
+  you want a clickable deliverable page with progress in place of a milestone.)
 
 **Plan by milestone.** Group the project board by milestone so each becomes a section with its
 issues underneath, and review progress per milestone.

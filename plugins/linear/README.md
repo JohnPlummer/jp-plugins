@@ -70,11 +70,14 @@ OAuth via the `linear-server` MCP - there is **no Linear token to store**. On fi
 
 ## Hierarchy
 
-Linear nests **project -> milestone -> issue -> sub-issue** (team is required, the rest optional). Mapping from Jira: product/large workstream -> Project, Epic -> **Milestone**, Story/Task -> Issue, Sub-task -> Sub-issue.
+Linear nests **project -> milestone -> issue -> sub-issue** (team is required, the rest optional). Mapping from Jira: Epic -> **Project**, phase of an epic -> **Milestone**, Story/Task -> Issue, Sub-task -> Sub-issue. A product or surface is not a layer - it is an **Area label**, so cross-project work stays filterable.
 
-- **Project** = one product or cohesive workstream; gets a lead and a description on creation.
-- **Milestone** = a feature or theme, the planning unit. Plan and review the project board grouped by milestone.
-- **Issue** = a deployable, roughly week-sized chunk under a milestone. Use a parent issue with sub-issues when an epic is one deliverable needing a clickable progress page.
+- **Project** = a deliverable with an end (a feature or a capability programme that completes and closes), not a product and not an open-ended bucket. Gets a lead and a description on creation. A feature spanning several repos is still one project.
+- **Milestone** = a phase within a project, the planning unit. Plan and review the project board grouped by milestone.
+- **Issue** = a deployable, roughly week-sized chunk under a milestone. Repo-agnostic, so one issue can touch a frontend and a backend repo.
+- **Sub-issue** = the routine one-hour-to-one-day unit of work. Break a larger issue into sub-issues when it needs decomposing. A small issue, such as a single bug, can stand on its own.
+
+**Labels carry product and concerns.** Every issue gets one **Type** and at least one **Area** label (the product or surface it touches - Area is the cross-project spine, since a product is a label here, not a project). **Concern** labels (Security, Performance, Observability, Accessibility) are optional. Where the team runs cycles, cycles are the delivery cadence: issues are scheduled into the current cycle and unfinished work rolls over.
 
 Project is **ticket metadata, not repo config**: it is chosen when a ticket is created and read off the ticket thereafter. Project<->repo is **many-to-many**: a monorepo serves several projects, and one project can span an API repo plus a web-app repo - so project is never derived from the repo or the repo from the project.
 
