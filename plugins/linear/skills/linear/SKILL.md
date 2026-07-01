@@ -54,11 +54,14 @@ Linear has no "Epic" object. Map Jira concepts onto Linear's hierarchy
 
 | Jira | Linear entity | MCP tool |
 |---|---|---|
-| Product / large workstream | Project | `save_project` |
-| Epic | Milestone | `save_milestone` |
+| Epic | Project | `save_project` |
+| Phase of an epic | Milestone | `save_milestone` |
 | Story / Task | Issue | `save_issue` |
 | Sub-task | Sub-issue | `save_issue` with `parentId` |
 | Comment | Comment | `save_comment` |
+
+A product or surface is not a layer here. It is carried by an Area label (see Labels), not by
+a project, so cross-product work stays filterable across projects.
 
 ## Statuses and priority
 
@@ -75,7 +78,8 @@ any label exists. Do not invent labels; if a needed one is missing, flag it to t
 rules are universal even though each workspace's labels differ:
 
 1. Every issue gets exactly one **Type** label (e.g. Bug, Feature, Tech Debt).
-2. Every issue gets at least one **Area** or **Project** label.
+2. Every issue gets at least one **Area** label - the product or surface it touches. This is the
+   cross-project spine, since a product is a label here, not a project.
 3. **Concern** labels (Accessibility, Performance, Security, Testing, …) are optional.
 4. Labels use Title Case unless they match a repo/project name.
 5. Mapping from a ticket file's frontmatter labels: pick the closest existing workspace label.
@@ -138,18 +142,20 @@ call this skill directly to avoid a slow chain.
 Linear nests project -> milestone -> issue -> sub-issue. Team is required; the other layers
 are optional.
 
-- **Project** - one product or cohesive workstream. Keep unrelated workstreams in separate
-  projects, not one catch-all. Separate an application from the shared libraries it depends on:
-  the library's development is its own project; the consumer tracks only its integration work.
-  Every project gets a lead and a description on creation - an empty project shell is a smell.
-- **Milestone** - a feature or theme, planned and reviewed as a unit. This is the planning
-  unit. Name it after the outcome (e.g. "Meetup integration"). A milestone has no page of its
-  own; to see its issues, group the project board by milestone.
-- **Issue** - a deployable, roughly week-sized chunk that delivers value on its own. Issues sit
-  under a milestone (set `milestone` on the issue).
-- **Sub-issue** - a child of an issue (one parent each). When an epic is really one deliverable
-  broken into tasks and you want a clickable page with progress, use a parent issue with
-  sub-issues instead of a milestone.
+- **Project** - a deliverable with an end: a feature or a capability programme that completes and
+  closes. Not a product and not an open-ended bucket (a product is an Area label, not a project).
+  A feature that spans several repos is still one project. Every project gets a lead and a
+  description on creation - an empty project shell is a smell.
+- **Milestone** - a phase within a project, planned and reviewed as a unit. This is the planning
+  unit inside a project. Name it after the outcome (e.g. "Meetup integration"). A milestone has
+  no page of its own; to see its issues, group the project board by milestone.
+- **Issue** - a deployable, roughly week-sized chunk that delivers value on its own. Repo-agnostic:
+  one issue can touch a frontend and a backend repo. Issues sit under a milestone (set `milestone`
+  on the issue).
+- **Sub-issue** - a child of an issue (one parent each), the routine one-hour-to-one-day unit of
+  actual work. Break every issue down into sub-issues rather than working at issue level. (A
+  parent issue with sub-issues also serves when you want a clickable deliverable page with
+  progress in place of a milestone.)
 
 **Plan by milestone.** Group the project board by milestone so each becomes a section with its
 issues underneath, and review progress per milestone.
