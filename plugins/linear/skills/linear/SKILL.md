@@ -77,7 +77,7 @@ Discover the taxonomy at runtime - `mcp__linear-server__list_issue_labels` - bef
 any label exists. Do not invent labels; if a needed one is missing, flag it to the user. The
 rules are universal even though each workspace's labels differ:
 
-1. Every issue gets exactly one **Type** label (e.g. Bug, Feature, Tech Debt).
+1. Every issue gets exactly one **Type** label (e.g. Bug, Feature, Chore, Tech Debt).
 2. Every issue gets at least one **Area** label - the product or surface it touches. This is the
    cross-project spine, since a product is a label here, not a project.
 3. **Concern** labels (Accessibility, Performance, Security, Testing, …) are optional.

@@ -131,7 +131,7 @@ Structure for success:
 
 **Essential Questions**
 
-1. "What type of ticket? (bug/feature/task/tech debt)"
+1. "What type of ticket? (bug/feature/chore/tech debt)"
 2. "Brief description of what needs to be done?"
 3. "Current problem or opportunity?"
 
