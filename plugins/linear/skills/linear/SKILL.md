@@ -65,9 +65,10 @@ a project, so cross-product work stays filterable across projects.
 
 ## Statuses and priority
 
-Status types: Backlog (backlog), Todo (unstarted), In Progress / In Review (started), Done
-(completed), Canceled / Duplicate (canceled). Never hardcode state *names* - resolve them at
-runtime with `list_issue_statuses` for the team, since workspaces rename them.
+Status types: Backlog (backlog), Todo (unstarted), In Progress / In Review / Blocked (started),
+Done (completed), Canceled / Duplicate (canceled). Never hardcode state *names* - resolve them at
+runtime with `list_issue_statuses` for the team, since workspaces rename them and add their own
+(e.g. a Blocked status in the started category).
 
 Priority values: 0 None, 1 Urgent, 2 High, 3 Normal, 4 Low.
 
