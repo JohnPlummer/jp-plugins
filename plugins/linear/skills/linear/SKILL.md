@@ -91,7 +91,7 @@ rules are universal even though each workspace's labels differ:
 2. Every issue gets at least one **Area** label - the product or surface it touches. This is the
    cross-project spine, since a product is a label here, not a project.
 3. **Concern** labels (Security, Performance, Observability, Accessibility) are optional, one or more.
-4. Labels use Title Case unless they match a repo/project name.
+4. Labels use Title Case.
 5. Mapping from a ticket file's frontmatter labels: pick the closest existing workspace label.
 
 ## Content fidelity
