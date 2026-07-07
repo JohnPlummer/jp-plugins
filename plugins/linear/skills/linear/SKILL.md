@@ -161,13 +161,14 @@ are optional.
 - **Milestone** - a phase within a project, planned and reviewed as a unit. This is the planning
   unit inside a project. Name it after the outcome (e.g. "Meetup integration"). A milestone has
   no page of its own; to see its issues, group the project board by milestone.
-- **Issue** - a deployable, roughly week-sized chunk that delivers value on its own. Repo-agnostic:
-  one issue can touch a frontend and a backend repo. Issues sit under a milestone (set `milestone`
-  on the issue).
-- **Sub-issue** - a child of an issue (one parent each), the routine one-hour-to-one-day unit of
-  actual work. Break a larger issue into sub-issues when it needs decomposing. A small issue,
-  such as a single bug, can stand on its own. (A parent issue with sub-issues also serves when
-  you want a clickable deliverable page with progress in place of a milestone.)
+- **Issue** - the smallest useful change that can ship on its own: one branch, one pull request.
+  This is the unit the GitHub automation acts on (branch -> In Progress, PR -> In Review, merge ->
+  Done), so keep it branch-sized. Normally one repo; work that spans repos splits into one issue
+  per PR. Issues sit under a milestone (set `milestone` on the issue).
+- **Sub-issue** - a child of an issue (one parent each), an optional checklist breakdown when an
+  issue needs decomposing - not a separate branch or PR unit, the branch and automation stay on
+  the issue. A small issue, such as a single bug, needs none. (A parent issue with sub-issues also
+  serves when you want a clickable deliverable page with progress in place of a milestone.)
 
 **Plan by milestone.** Group the project board by milestone so each becomes a section with its
 issues underneath, and review progress per milestone.
