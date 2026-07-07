@@ -58,6 +58,7 @@ Each phase is a skill, invoked by name (`/setup`, or namespaced `/dev-workflow:s
 - `/setup` - onboard the current repo (linear-server MCP, Linear routing in committed `.claude/settings.json`, Makefile contract, `docs/plans` + `docs/decisions`, optional CI review). Idempotent; run once per repo before `/implement`.
 - `/implement <TICKET>` - primary orchestrator (chains all phases + human gates).
 - `/plan <TICKET>` - ticket -> thin committed plan file with BDD acceptance criteria.
+- `/technical-design "<name>"` - interview -> brainstorm -> draft a Technical Design doc into `docs/design/` for a new service or significant change (PII/payments/integration/data-model/auth). Signed off by PR approval.
 - `/build <TICKET> <PLAN-PATH>` - run the role-isolated TDD workflow on an approved plan, e.g. `/build JP-123 docs/plans/JP-123-rate-limiter.md`.
 - `/review [PR] [--heavy]` - diff-oriented review (any author) against philosophy + standards; light single-pass by default, `--heavy` for the local multi-agent pass. Same engine runs in CI.
 - `/adr "<title>"` - write a MADR 4.0.0 ADR, e.g. `/adr "Use Redis for the rate limiter"`.
