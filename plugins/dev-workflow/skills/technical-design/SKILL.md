@@ -96,8 +96,10 @@ gnarly section, the `brainstorm` skill can drive it; otherwise brainstorm inline
   [--dir docs/design]
 ```
 
-It writes `docs/design/<slug>.md` from `templates/technical-design.md` and prints the path.
-`--dir` overrides the location for a non-standard layout; default is `docs/design`.
+It writes `docs/design/<slug>.md` from the bundled template at the plugin root
+(`templates/technical-design.md`, i.e. `$CLAUDE_PLUGIN_ROOT/templates/technical-design.md`)
+and prints the path. `--dir` overrides the location for a non-standard layout; default is
+`docs/design`.
 
 ### 6. Fill the doc
 
@@ -125,9 +127,11 @@ Output the design file path so it can be committed and raised as a PR.
 
 ## Notes
 
-- Template: `templates/technical-design.md` (bundled; the script copies it). Nine fixed
-  sections so the downstream Production Readiness Check can map onto them -- keep the
-  section set and order.
+- Canonical standard: the authoritative version lives at `Boundless-UK/engineering-wiki` ->
+  `ways-of-working/technical-design.md`. Keep this skill's rules and template in sync with it.
+- Template: `templates/technical-design.md` at the plugin root (bundled; the script copies
+  it). Nine fixed sections so the downstream Production Readiness Check can map onto them --
+  keep the section set and order.
 - Designs are named by slug, with no numbering or index (unlike ADRs). Re-running `new`
   with the same title errors rather than clobbering an existing design.
 - The upstream PRD is a product spec for a broader audience and stays in Word -- this skill
