@@ -68,11 +68,12 @@ Each phase is a skill, invoked by name (`/setup`, or namespaced `/dev-workflow:s
 
 `review` and `standards-check` both resolve the external standards from `$DEV_WORKFLOW_STANDARDS_PATH`, a directory holding a `common-llms.md` index. Nothing hardcodes a path, so the same plugin works against a personal wiki, a team wiki, or a CI checkout:
 
-| Context          | Set it in                                    | Points at                                     |
-| ---------------- | -------------------------------------------- | --------------------------------------------- |
-| Personal machine | `~/.claude/settings.json` `env`              | your engineering wiki's `standards/`          |
-| Work machine     | the repo's committed `.claude/settings.json` | the team engineering wiki's `standards/`      |
-| CI               | `templates/ci-review.yml` `env`              | the standards repo checked out for the job    |
+| Context     | Set it in                             | Points at                                     |
+| ----------- | ------------------------------------- | --------------------------------------------- |
+| Any machine | `~/.claude/settings.local.json` `env` | that machine's engineering wiki, `standards/` |
+| CI          | `templates/ci-review.yml` `env`       | the standards repo checked out for the job    |
+
+Use `settings.local.json`, never the tracked `settings.json`. It is machine-local and gitignored, so each machine points at its own wiki (personal or team) with its own home directory. A path committed to `settings.json` would be wrong everywhere else it synced to.
 
 If it is unset, `review` skips the external layer and reviews against repo standards alone; `standards-check` stops and says so rather than passing against nothing.
 
@@ -97,7 +98,7 @@ checks. Findings are tagged 🔴 Important / 🟡 Nit / 🟣 Pre-existing.
 
 ## Build interface contract (Makefile)
 
-The plugin invokes tests/checks via canonical `make` targets so the same commands work across languages: `setup`, `mocks`, `build`, `test-unit`, `test`, `check`, `check-ci` (+ composed `deps`/`fmt`/`lint`/`test-integration`/`test-coverage`). Standard: `~/.claude/standards/workflow/makefile-targets.md`. Reference Makefiles for Go and TS ship in [`templates/`](./templates).
+The plugin invokes tests/checks via canonical `make` targets so the same commands work across languages: `setup`, `mocks`, `build`, `test-unit`, `test`, `check`, `check-ci` (+ composed `deps`/`fmt`/`lint`/`test-integration`/`test-coverage`). Standard: `workflow/makefile-targets.md` in the resolved standards source (see Standards Source). Reference Makefiles for Go and TS ship in [`templates/`](./templates).
 
 ## Dependencies
 

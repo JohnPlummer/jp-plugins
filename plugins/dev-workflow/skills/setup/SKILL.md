@@ -78,7 +78,7 @@ If there is no Makefile, detect the language and scaffold from the reference:
 
 Copy the template to `Makefile`. If a Makefile exists but is missing required targets, list
 the missing ones and offer to add them from the template (do not clobber working targets).
-The contract is the standard `~/.claude/standards/workflow/makefile-targets.md` - the
+The contract is the standard `workflow/makefile-targets.md` in the resolved standards source (`$DEV_WORKFLOW_STANDARDS_PATH`) - the
 plugin's required set is a subset of it.
 
 ## 4. Folders

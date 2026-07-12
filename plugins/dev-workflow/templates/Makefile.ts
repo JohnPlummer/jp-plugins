@@ -1,5 +1,5 @@
 # Reference Makefile (TypeScript/Node) - implements the dev-workflow target contract.
-# Standard: ~/.claude/standards/workflow/makefile-targets.md
+# Standard: workflow/makefile-targets.md in the engineering wiki's standards/
 # Copy into a Node repo and wire the tooling behind each target. The dev-workflow
 # plugin invokes these targets by name; the repo decides the toolchain.
 

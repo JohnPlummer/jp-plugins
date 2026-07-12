@@ -22,11 +22,12 @@ Read `$DEV_WORKFLOW_STANDARDS_PATH`. That directory is the standards source, and
 
 Its value is set per context, and this skill does not care which:
 
-| Context          | Set in                                       | Points at                                              |
-| ---------------- | -------------------------------------------- | ------------------------------------------------------ |
-| Personal machine | `~/.claude/settings.json` `env`              | a clone of the personal engineering wiki, `standards/` |
-| Work machine     | the repo's committed `.claude/settings.json` | a clone of the team engineering wiki, `standards/`     |
-| CI               | the review workflow's `env`                  | the standards repo checked out for that job            |
+| Context     | Set in                                | Points at                                                  |
+| ----------- | ------------------------------------- | ---------------------------------------------------------- |
+| Any machine | `~/.claude/settings.local.json` `env` | that machine's clone of its engineering wiki, `standards/` |
+| CI          | the review workflow's `env`           | the standards repo checked out for that job                |
+
+`settings.local.json` is machine-local and gitignored, which is what makes this work: the same `~/.claude` is shared across machines via git, but the standards path differs per machine (a personal wiki on one, the team wiki on another) and the home directory differs too. A path in the tracked `settings.json` would be wrong on every machine but the one it was written on.
 
 **If the variable is unset or does not resolve to a directory containing `common-llms.md`, stop.** Report that the standards source is unresolved, name the variable, and check nothing further. A PASS with no standards loaded is a false negative, and worse than no check at all - it tells the caller their code conforms when nothing looked.
 
