@@ -34,14 +34,16 @@ The cascade, most specific first:
    Code. Use it when a repo belongs to a team or workspace other than the machine default, or to
    pin a default project. It is shared repo config, the same for everyone who clones the repo, and
    nothing in it is secret: auth is OAuth via the MCP and no token is stored.
-2. **Machine default** - the `env` block of `~/.claude/settings.local.json`, read from the file. A
-   machine belongs to one workspace and its MCP is authenticated against that workspace, so this is
-   the everyday default: a personal Mac resolves to the personal workspace and its team, a work Mac
-   to the work one. It must be `settings.local.json`, which is gitignored - `~/.claude` is shared
-   across machines through git, and this binding is not.
+2. **Machine default** - `$LINEAR_*` exported from `~/.zshrc.local`, which `.zshrc` sources and git
+   never tracks. A machine belongs to one workspace and its MCP is authenticated against that
+   workspace, so this is the everyday default: a personal Mac resolves to the personal workspace and
+   its team, a work Mac to the work one. It cannot live in `~/.claude` - that is shared across
+   machines through git, and this binding is not.
 
-The script reads the file for layer 2 rather than trusting the environment, because user-scope
-`settings.local.json` is not a documented settings layer and injection cannot be relied on.
+The script reads the repo's settings file for layer 1 rather than trusting `$LINEAR_*` in the
+environment, so a repo bound to another workspace always wins over the machine default no matter how
+Claude Code orders its env injection. That is the case that must never invert: a wrong-workspace
+write is hard to undo.
 
 If nothing resolves, the script fails and you stop. Never fall back to a hardcoded guess, and never
 infer a team from the repo name.

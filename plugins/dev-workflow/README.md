@@ -70,10 +70,10 @@ Each phase is a skill, invoked by name (`/setup`, or namespaced `/dev-workflow:s
 
 | Context     | Set it in                             | Points at                                     |
 | ----------- | ------------------------------------- | --------------------------------------------- |
-| Any machine | `~/.claude/settings.local.json` `env` | that machine's engineering wiki, `standards/` |
+| Any machine | `~/.zshrc.local` (`export`)           | that machine's engineering wiki, `standards/` |
 | CI          | `templates/ci-review.yml` `env`       | the standards repo checked out for the job    |
 
-Use `settings.local.json`, never the tracked `settings.json`. It is machine-local and gitignored, so each machine points at its own wiki (personal or team) with its own home directory. A path committed to `settings.json` would be wrong everywhere else it synced to.
+Export it from `~/.zshrc.local`, never from anything under `~/.claude`. That file is sourced by `.zshrc` and never committed, so each machine points at its own wiki (personal or team) under its own home directory. `~/.claude` is shared across machines through git, so a path committed there would be wrong everywhere else it synced to.
 
 If it is unset, `review` skips the external layer and reviews against repo standards alone; `standards-check` stops and says so rather than passing against nothing.
 
