@@ -62,6 +62,19 @@ Each phase is a skill, invoked by name (`/setup`, or namespaced `/dev-workflow:s
 - `/build <TICKET> <PLAN-PATH>` - run the role-isolated TDD workflow on an approved plan, e.g. `/build JP-123 docs/plans/JP-123-rate-limiter.md`.
 - `/review [PR] [--heavy]` - diff-oriented review (any author) against philosophy + standards; light single-pass by default, `--heavy` for the local multi-agent pass. Same engine runs in CI.
 - `/adr "<title>"` - write a MADR 4.0.0 ADR, e.g. `/adr "Use Redis for the rate limiter"`.
+- `/standards-check [target]` - check a diff, a plan, or a file against the resolved standards only (no philosophy layer, no review criteria). The narrow check `/review` subsumes.
+
+## Standards Source
+
+`review` and `standards-check` both resolve the external standards from `$DEV_WORKFLOW_STANDARDS_PATH`, a directory holding a `common-llms.md` index. Nothing hardcodes a path, so the same plugin works against a personal wiki, a team wiki, or a CI checkout:
+
+| Context          | Set it in                                    | Points at                                     |
+| ---------------- | -------------------------------------------- | --------------------------------------------- |
+| Personal machine | `~/.claude/settings.json` `env`              | your engineering wiki's `standards/`          |
+| Work machine     | the repo's committed `.claude/settings.json` | the team engineering wiki's `standards/`      |
+| CI               | `templates/ci-review.yml` `env`              | the standards repo checked out for the job    |
+
+If it is unset, `review` skips the external layer and reviews against repo standards alone; `standards-check` stops and says so rather than passing against nothing.
 
 ## CI review
 

@@ -31,9 +31,12 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # --- configure your external standards source here ---
-      STANDARDS_REPO: JohnPlummer/engineering-standards
+      # The standards live in a subfolder of an engineering wiki, so STANDARDS_ROOT is the
+      # checkout path plus that subfolder. At work, point STANDARDS_REPO at the team wiki.
+      STANDARDS_REPO: JohnPlummer/personal-engineering-wiki
       STANDARDS_REF: main
       STANDARDS_PATH: .dev-workflow-standards
+      STANDARDS_ROOT: .dev-workflow-standards/standards
     steps:
       - name: Check out the PR
         uses: actions/checkout@v4
@@ -55,5 +58,5 @@ jobs:
           prompt: "/dev-workflow:review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}"
           claude_args: "--max-turns 20"
         env:
-          # The review skill reads this to find the checked-out external standards.
-          DEV_WORKFLOW_STANDARDS_PATH: ${{ env.STANDARDS_PATH }}
+          # review and standards-check both read this to find the checked-out standards.
+          DEV_WORKFLOW_STANDARDS_PATH: ${{ env.STANDARDS_ROOT }}
