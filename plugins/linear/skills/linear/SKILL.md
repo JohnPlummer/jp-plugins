@@ -20,18 +20,31 @@ directly.
 
 ## Config + workspace safety (run once per session, before any MCP touchpoint)
 
-Routing is read from the environment. Set it in the repo's committed `.claude/settings.json`
-`env` - it is shared repo config (the team/workspace/project are the same for everyone on the
-repo), and nothing here is secret (auth is OAuth via the MCP, no token is stored). Use
-`settings.local.json` only for a personal per-machine override. Claude Code injects those
-keys, so:
+Resolve routing with the script. It prints `KEY=VALUE` lines, or exits non-zero naming what is
+missing. Do not read the env keys directly - the script owns the cascade:
 
-```
-echo "workspace=$LINEAR_WORKSPACE team=$LINEAR_DEFAULT_TEAM_NAME id=$LINEAR_DEFAULT_TEAM_ID prefix=$LINEAR_DEFAULT_TEAM_PREFIX"
+```bash
+eval "$("$CLAUDE_PLUGIN_ROOT/skills/linear/scripts/resolve-routing.sh")" || exit 1
+echo "workspace=$LINEAR_WORKSPACE team=$LINEAR_DEFAULT_TEAM_NAME prefix=$LINEAR_DEFAULT_TEAM_PREFIX"
 ```
 
-If any are unset, stop and tell the user to add the binding (plugin README "Setup"). Never
-fall back to a hardcoded guess.
+The cascade, most specific first:
+
+1. **Repo binding (wins)** - the repo's committed `.claude/settings.json` `env`, injected by Claude
+   Code. Use it when a repo belongs to a team or workspace other than the machine default, or to
+   pin a default project. It is shared repo config, the same for everyone who clones the repo, and
+   nothing in it is secret: auth is OAuth via the MCP and no token is stored.
+2. **Machine default** - the `env` block of `~/.claude/settings.local.json`, read from the file. A
+   machine belongs to one workspace and its MCP is authenticated against that workspace, so this is
+   the everyday default: a personal Mac resolves to the personal workspace and its team, a work Mac
+   to the work one. It must be `settings.local.json`, which is gitignored - `~/.claude` is shared
+   across machines through git, and this binding is not.
+
+The script reads the file for layer 2 rather than trusting the environment, because user-scope
+`settings.local.json` is not a documented settings layer and injection cannot be relied on.
+
+If nothing resolves, the script fails and you stop. Never fall back to a hardcoded guess, and never
+infer a team from the repo name.
 
 **Workspace safety:** before the first operation, call `mcp__linear-server__get_team` with
 `$LINEAR_DEFAULT_TEAM_ID`. If it 404s or the name differs from `$LINEAR_DEFAULT_TEAM_NAME`,
@@ -52,13 +65,13 @@ several projects. It is a soft default, always overridable per ticket - never a 
 Linear has no "Epic" object. Map Jira concepts onto Linear's hierarchy
 (project -> milestone -> issue -> sub-issue):
 
-| Jira | Linear entity | MCP tool |
-|---|---|---|
-| Epic | Project | `save_project` |
-| Phase of an epic | Milestone | `save_milestone` |
-| Story / Task | Issue | `save_issue` |
-| Sub-task | Sub-issue | `save_issue` with `parentId` |
-| Comment | Comment | `save_comment` |
+| Jira             | Linear entity | MCP tool                     |
+| ---------------- | ------------- | ---------------------------- |
+| Epic             | Project       | `save_project`               |
+| Phase of an epic | Milestone     | `save_milestone`             |
+| Story / Task     | Issue         | `save_issue`                 |
+| Sub-task         | Sub-issue     | `save_issue` with `parentId` |
+| Comment          | Comment       | `save_comment`               |
 
 A product or surface is not a layer here. It is carried by an Area label (see Labels), not by
 a project, so cross-product work stays filterable across projects.
@@ -111,26 +124,26 @@ stop on the first error and report before continuing.
 Each is `mcp__linear-server__<tool>`. Only pass the fields you want to change; omitted fields
 are left unchanged.
 
-| Operation | Tool + key params |
-|---|---|
-| Create issue | `save_issue` (title, team, description, state, priority, labels, project, assignee). If the caller gives no project and `$LINEAR_DEFAULT_PROJECT_ID` is set, default `project` to it (note which project you applied; let the user override). |
-| View issue | `get_issue` (id, includeRelations: true) |
-| Update issue | `save_issue` (id + changed fields) |
-| Add comment | `save_comment` (issueId, body) |
-| List comments | `list_comments` (issueId) |
-| Search (filters) | `list_issues` (team, state, assignee, label, project) |
-| Search (text) | `search` (query, type: "issue") |
-| List sub-tasks | `list_issues` (parentId) |
-| Create project | `save_project` (name, addTeams, description, lead, priority). Always set a description and lead - an empty project shell is a smell. `icon` must be a valid Linear icon name, not a Unicode emoji - omit if unsure. |
-| Link to project | `save_issue` (id, project) |
-| Create milestone | `save_milestone` (project, name) |
-| Update milestone | `save_milestone` (id + changed fields) |
-| List milestones | `list_milestones` (project) |
-| Set issue milestone | `save_issue` (id, milestone) |
-| Set parent | `save_issue` (id, parentId) |
-| List cycles | `list_cycles` (teamId, type: current/previous/next) |
-| Schedule into cycle | `save_issue` (id, cycle - name, number, or ID; resolve "current" via `list_cycles` type=current) |
-| Block/unblock | `save_issue` (id, blocks/blockedBy arrays; `removeBlocks`/`removeBlockedBy` to remove - append-only) |
+| Operation           | Tool + key params                                                                                                                                                                                                                             |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Create issue        | `save_issue` (title, team, description, state, priority, labels, project, assignee). If the caller gives no project and `$LINEAR_DEFAULT_PROJECT_ID` is set, default `project` to it (note which project you applied; let the user override). |
+| View issue          | `get_issue` (id, includeRelations: true)                                                                                                                                                                                                      |
+| Update issue        | `save_issue` (id + changed fields)                                                                                                                                                                                                            |
+| Add comment         | `save_comment` (issueId, body)                                                                                                                                                                                                                |
+| List comments       | `list_comments` (issueId)                                                                                                                                                                                                                     |
+| Search (filters)    | `list_issues` (team, state, assignee, label, project)                                                                                                                                                                                         |
+| Search (text)       | `search` (query, type: "issue")                                                                                                                                                                                                               |
+| List sub-tasks      | `list_issues` (parentId)                                                                                                                                                                                                                      |
+| Create project      | `save_project` (name, addTeams, description, lead, priority). Always set a description and lead - an empty project shell is a smell. `icon` must be a valid Linear icon name, not a Unicode emoji - omit if unsure.                           |
+| Link to project     | `save_issue` (id, project)                                                                                                                                                                                                                    |
+| Create milestone    | `save_milestone` (project, name)                                                                                                                                                                                                              |
+| Update milestone    | `save_milestone` (id + changed fields)                                                                                                                                                                                                        |
+| List milestones     | `list_milestones` (project)                                                                                                                                                                                                                   |
+| Set issue milestone | `save_issue` (id, milestone)                                                                                                                                                                                                                  |
+| Set parent          | `save_issue` (id, parentId)                                                                                                                                                                                                                   |
+| List cycles         | `list_cycles` (teamId, type: current/previous/next)                                                                                                                                                                                           |
+| Schedule into cycle | `save_issue` (id, cycle - name, number, or ID; resolve "current" via `list_cycles` type=current)                                                                                                                                              |
+| Block/unblock       | `save_issue` (id, blocks/blockedBy arrays; `removeBlocks`/`removeBlockedBy` to remove - append-only)                                                                                                                                          |
 
 `list_issues` with no filter returns only the most-recently-updated set. Pass `team` and
 `limit` for the full set, and page via `cursor` for large results.

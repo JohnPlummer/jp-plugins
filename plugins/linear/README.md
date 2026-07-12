@@ -30,22 +30,21 @@ dev-workflow uses exactly five operations from the `linear` skill, the stable co
 
 ## Setup
 
-Routing is read from the environment as `$LINEAR_*` keys. Put them in the repo's **committed `.claude/settings.json`** under `env`. Claude Code injects them into the tool environment, so `$LINEAR_*` resolves in the skill's bash checks.
+Routing resolves through `skills/linear/scripts/resolve-routing.sh`, as a two-layer cascade:
 
-Commit it, don't hide it in `settings.local.json`:
+1. **Machine default** - the `env` block of `~/.claude/settings.local.json`. A machine belongs to one Linear workspace, and its MCP is authenticated against that workspace, so this is the everyday default: a personal Mac resolves to the personal workspace and team, a work Mac to the work one. Most repos need nothing else. It must be `settings.local.json`, which is gitignored - `~/.claude` is shared across machines through git, and this binding is not (the workspaces differ, and so do the home directories).
+2. **Repo binding (wins)** - the repo's **committed `.claude/settings.json`** under `env`. Use it when a repo belongs to a team or workspace other than the machine default, or to pin `LINEAR_DEFAULT_PROJECT_ID`. These are facts about the repo, the same for everyone who clones it, so they are shared versioned config. Nothing here is secret: auth is OAuth via the MCP (see Auth), so no token is ever committed - these keys are only routing identifiers.
 
-- The team, workspace, prefix, and default project are facts about the repo, the same for everyone who clones it - shared, versioned config, not a per-developer choice.
-- Nothing here is secret. Auth is OAuth via the `linear-server` MCP (see Auth), so no token is ever committed; these keys are just routing identifiers.
-- Use `settings.local.json` only for a genuine per-machine override (rare). The cascade is Managed > Local (`settings.local.json`) > Project (`settings.json`) > User, so a local override still wins when you need one.
+The script reads the file for layer 1 rather than trusting `$LINEAR_*` in the environment: user-scope `settings.local.json` is not a documented settings layer, so whether Claude Code injects it cannot be relied on. Reading it makes the cascade behave the same on every machine. If neither layer resolves, the script fails and the skill stops rather than guessing a team - wrong-workspace writes are hard to undo.
 
-| Key | What | Example |
-|---|---|---|
-| `LINEAR_WORKSPACE` | workspace slug (the OAuth target) | `personal-jpp` |
-| `LINEAR_DEFAULT_TEAM_ID` | team UUID (the safety check) | `537fb028-…` |
-| `LINEAR_DEFAULT_TEAM_NAME` | team name | `JP` |
-| `LINEAR_DEFAULT_TEAM_PREFIX` | issue ID prefix | `JP` (-> `JP-123`) |
-| `LINEAR_DEFAULT_PROJECT_ID` | *optional* - default project for new tickets | `8db96294-…` |
-| `LINEAR_DEFAULT_PROJECT_NAME` | *optional* - readable name for the above | `Get Out More` |
+| Key                           | What                                         | Example            |
+| ----------------------------- | -------------------------------------------- | ------------------ |
+| `LINEAR_WORKSPACE`            | workspace slug (the OAuth target)            | `personal-jpp`     |
+| `LINEAR_DEFAULT_TEAM_ID`      | team UUID (the safety check)                 | `537fb028-…`       |
+| `LINEAR_DEFAULT_TEAM_NAME`    | team name                                    | `JP`               |
+| `LINEAR_DEFAULT_TEAM_PREFIX`  | issue ID prefix                              | `JP` (-> `JP-123`) |
+| `LINEAR_DEFAULT_PROJECT_ID`   | *optional* - default project for new tickets | `8db96294-…`       |
+| `LINEAR_DEFAULT_PROJECT_NAME` | *optional* - readable name for the above     | `Get Out More`     |
 
 Example `<repo>/.claude/settings.json`:
 
