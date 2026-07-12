@@ -77,6 +77,16 @@ Export it from `~/.zshrc.local`, never from anything under `~/.claude`. That fil
 
 If it is unset, `review` skips the external layer and reviews against repo standards alone; `standards-check` stops and says so rather than passing against nothing.
 
+## Wiki Source
+
+Standards are the rules for the artefact. The ways of working (Technical Design, ADRs, documentation) live in the same wiki but outside `standards/`, and are not in the `common-llms.md` index, so nothing loads them automatically. Skills that carry a copy of a way of working resolve the authoritative page from `$DEV_WORKFLOW_WIKI_PATH`, the wiki repo **root**:
+
+```sh
+export DEV_WORKFLOW_WIKI_PATH="$HOME/code/personal-engineering-wiki"
+```
+
+Export it from `~/.zshrc.local`, for the same reason as the standards path: `~/.claude` is shared across machines through git, so one machine can point at a personal wiki and another at the team wiki only if the path lives outside it. `technical-design` reads `$DEV_WORKFLOW_WIKI_PATH/ways-of-working/technical-design.md` and lets it win over the skill's own copy; with the variable unset, the skill falls back to that copy. No skill hardcodes a wiki path or repo name.
+
 ## CI review
 
 CI cannot run the Workflow tool, so the deterministic multi-agent build/review core is
