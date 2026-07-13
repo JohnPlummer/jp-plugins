@@ -22,23 +22,32 @@ Read `$DEV_WORKFLOW_STANDARDS_PATH`. That directory is the standards source, and
 
 Its value is set per context, and this skill does not care which:
 
-| Context     | Set in                                | Points at                                                  |
-| ----------- | ------------------------------------- | ---------------------------------------------------------- |
-| Any machine | `~/.zshrc.local` (`export`)           | that machine's clone of its engineering wiki, `standards/` |
-| CI          | the review workflow's `env`           | the standards repo checked out for that job                |
+| Context     | Set in                       | Points at                                                  |
+| ----------- | ---------------------------- | ---------------------------------------------------------- |
+| Any machine | `~/.zshenv.local` (`export`) | that machine's clone of its engineering wiki, `standards/` |
+| CI          | the review workflow's `env`  | the standards repo checked out for that job                |
 
-`~/.zshrc.local` is sourced by `.zshrc` and never committed, which is what makes this work: `~/.claude` is shared across machines through git, but the standards path is not. One machine points at a personal wiki, another at the team wiki, and even the home directory differs (`/Users/jp` vs `/Users/johnp`). A path committed under `~/.claude` would be wrong on every machine except the one that wrote it.
+`~/.zshenv.local` is sourced by `~/.zshenv` on every shell invocation and never committed, which is what makes this work: `~/.claude` is shared across machines through git, but the standards path is not. One machine points at a personal wiki, another at the team wiki, and even the home directory differs (`/Users/jp` vs `/Users/johnp`). A path committed under `~/.claude` would be wrong on every machine except the one that wrote it. Prefer `.zshenv.local` over `.zshrc.local`: `.zshrc` is skipped by non-interactive shells, so a value set there is invisible to any tool that shells out without a tty.
 
-**If the variable is unset or does not resolve to a directory containing `common-llms.md`, stop.** Report that the standards source is unresolved, name the variable, and check nothing further. A PASS with no standards loaded is a false negative, and worse than no check at all - it tells the caller their code conforms when nothing looked.
+**Then find the index.** Take the first of these that exists, and call it `$INDEX`:
+
+1. `$STANDARDS/common-llms.md`
+2. `$STANDARDS/README.md`
+
+Both are valid. A corpus large enough to need a machine-only index has `common-llms.md`; a smaller corpus keeps one index for humans and machines in its `README.md`. Either way the index is what tells you which pages to load.
+
+**If the variable is unset, does not resolve to a directory, or that directory has neither file, stop.** Report that the standards source is unresolved, name the variable, and check nothing further. A PASS with no standards loaded is a false negative, and worse than no check at all - it tells the caller their code conforms when nothing looked.
 
 ## 2. Load The Relevant Standards
 
-1. Read the index: `$STANDARDS/common-llms.md`.
+1. Read `$INDEX`, resolved in step 1.
 2. Find the "Loading Strategy by Task Type" table.
-3. Match the code or plan to task types (e.g. "Go API endpoint", "Writing tests (Go)").
+3. Match the code or plan to task types (e.g. "Go API endpoint", ".NET write endpoint (Command)", "Writing tests (Website)").
 4. Read every standard the matched rows list, from `$STANDARDS/<domain>/<file>.md`. Index paths may be written `standards/<domain>/<file>` - resolve them relative to `$STANDARDS`, stripping a leading `standards/`.
 
 Load only what the diff or plan touches. The index exists so the whole corpus never enters context.
+
+**If `$INDEX` has no "Loading Strategy by Task Type" table**, say so in your output, then fall back to selecting pages from the index's own descriptions. Do not go quiet about it: without the table, page selection is your judgment rather than a mapping, so the caller needs to know a page may have been missed.
 
 ## 3. Load Project Standards
 

@@ -40,12 +40,7 @@ Three layers, merged by topic; the repo overrides the external source on any con
 1. **Philosophy (always on, never overridable).** Read
    `${CLAUDE_PLUGIN_ROOT}/docs/philosophy.md`. These are values, not style - they outrank
    standards but cover different ground.
-2. **External standards (org/team/user).** If `$DEV_WORKFLOW_STANDARDS_PATH` is set, that
-   directory is the checked-out standards source. Read its `common-llms.md` index and load
-   only the files matching the languages/domains in the diff (Go, TS, testing, database,
-   etc.). Index paths may be written `standards/<topic>/<file>` - resolve them relative to
-   the standards root (strip a leading `standards/`). If the var is unset, skip this layer
-   (local-folder-only users get a repo-only review; CI must set it for parity).
+2. **External standards (org/team/user).** If `$DEV_WORKFLOW_STANDARDS_PATH` is set, that directory is the checked-out standards source. Read its index - `common-llms.md` if present, otherwise `README.md`, whichever the corpus uses - and load only the files matching the languages/domains in the diff (Go, TS, .NET, testing, database, etc.). If the index carries a "Loading Strategy by Task Type" table, select pages through it rather than by eye. Index paths may be written `standards/<topic>/<file>` - resolve them relative to the standards root (strip a leading `standards/`). If the var is unset, or the directory has neither index file, skip this layer and say so in the output (local-folder-only users get a repo-only review; CI must set it for parity).
 3. **Repo standards (win on conflict).** Read the repo's `CLAUDE.md` (and any nested
    `CLAUDE.md` under changed paths - they apply only to files beneath them) and, if present,
    a repo `REVIEW.md`. `REVIEW.md` is review-only instruction and takes precedence over the
