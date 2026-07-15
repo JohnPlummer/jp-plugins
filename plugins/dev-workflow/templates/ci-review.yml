@@ -31,22 +31,27 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # --- configure your external standards source here ---
-      # The standards live in a subfolder of an engineering wiki, so STANDARDS_ROOT is the
-      # checkout path plus that subfolder. At work, point STANDARDS_REPO at the team wiki.
-      STANDARDS_REPO: JohnPlummer/personal-engineering-wiki
+      # The standards live in a subfolder of a repo, so STANDARDS_ROOT is the checkout path
+      # plus that subfolder. STANDARDS_SPARSE pulls only that subtree (checkout can only
+      # clone a whole repo, not a path), so a big repo like a notes vault never fully lands.
+      # At work, point STANDARDS_REPO at the team wiki.
+      STANDARDS_REPO: JohnPlummer/notes
       STANDARDS_REF: main
       STANDARDS_PATH: .dev-workflow-standards
-      STANDARDS_ROOT: .dev-workflow-standards/standards
+      STANDARDS_SPARSE: 2.Areas/Engineering/standards
+      STANDARDS_ROOT: .dev-workflow-standards/2.Areas/Engineering/standards
     steps:
       - name: Check out the PR
         uses: actions/checkout@v4
 
-      - name: Check out external standards (pinned)
+      - name: Check out external standards (pinned, sparse)
         uses: actions/checkout@v4
         with:
           repository: ${{ env.STANDARDS_REPO }}
           ref: ${{ env.STANDARDS_REF }}
           path: ${{ env.STANDARDS_PATH }}
+          sparse-checkout: ${{ env.STANDARDS_SPARSE }}
+          sparse-checkout-cone-mode: false
           token: ${{ secrets.STANDARDS_REPO_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Review the diff
