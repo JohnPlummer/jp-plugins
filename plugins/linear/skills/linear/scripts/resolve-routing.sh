@@ -10,6 +10,11 @@
 #      and never committed. A machine belongs to one Linear workspace and its MCP is
 #      authenticated against that workspace, so this is the everyday default: a personal Mac
 #      resolves to the personal workspace, a work Mac to the work one.
+#      Taken from the environment when present, otherwise read straight out of the file.
+#      The file read is what makes this work under Claude Code: .zshrc runs only for
+#      interactive shells, and the Bash tool is not one, so the exports are never inherited
+#      there. They are still perfectly readable, so read them rather than declaring them
+#      missing. Values are read, never sourced, so nothing else in the file is executed.
 #
 # Prints KEY=VALUE lines for eval, or exits 1 naming what is missing. Never guesses a team:
 # a wrong-workspace write is hard to undo.
@@ -30,10 +35,18 @@ print(env.get(sys.argv[2], ""))
 PY
 }
 
-resolve() {                       # repo binding wins, else the machine default from the shell
+from_zshrc_local() {              # from_zshrc_local <KEY> -> value exported in ~/.zshrc.local
+  local file="${ZSHRC_LOCAL:-$HOME/.zshrc.local}"
+  [ -f "$file" ] || return 0
+  sed -n -E "s/^[[:space:]]*export[[:space:]]+$1=[[:space:]]*(\"([^\"]*)\"|'([^']*)'|([^[:space:]#]*)).*/\2\3\4/p" \
+    "$file" | head -1
+}
+
+resolve() {                       # repo binding wins, then the environment, then the file
   local key="$1" val
   val="$(from_repo "$key")"
   [ -n "$val" ] || val="${!key:-}"
+  [ -n "$val" ] || val="$(from_zshrc_local "$key")"
   printf '%s' "$val"
 }
 
