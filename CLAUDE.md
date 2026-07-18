@@ -8,7 +8,13 @@ Do not add a `version` field to `plugins/*/.claude-plugin/plugin.json`. If you f
 
 This happened. `linear` declared `1.0.1` and served a 19 June snapshot for three weeks, missing two commits that had changed its skill. A correct fix merged and changed nothing, because nothing was reading it. `dev-workflow`, which declares no version, re-cached on every commit throughout.
 
-A `version` inside a `dependencies` entry is a constraint, not a declaration. Those are fine and the check ignores them.
+## Do not add semver constraints to dependencies either
+
+Declare dependencies as bare strings: `"dependencies": ["linear"]`. A bare string depends on whatever the marketplace provides, which is what tracking commits means.
+
+An object entry with a `version` constraint resolves against **git tags** named `{plugin}--v{version}`, created by `claude plugin tag`. This repo publishes no tags, so a constraint has nothing to match and the dependent plugin is disabled with `no-matching-tag`. Constraints and SHA-tracking are mutually exclusive: pick one, and here it is SHA-tracking.
+
+The check permits a `version` inside a `dependencies` entry, because that is a constraint rather than a declaration and does not affect the cache key. It is still the wrong choice here.
 
 **Verify what is actually live** when a plugin change appears to have no effect:
 
