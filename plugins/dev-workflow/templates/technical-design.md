@@ -1,6 +1,9 @@
 # Technical Design: {Service or change name}
 
 - **Owner:** {name}
+- **Status:** Proposed | Accepted | Built | Superseded | Abandoned
+- **Built by:** {commit or PR link, once Status is Built}
+- **Current behaviour:** {link to the architecture page or runbook that now owns this, once Status is Built}
 
 ## 1. Overview
 

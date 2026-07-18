@@ -5,7 +5,7 @@ description: |
   docs/design/. Use whenever someone needs to write up how a new service or significant
   change will be built before coding - a design doc, architecture doc, or "how are we
   going to build X" write-up - even if they don't say "Technical Design". Significant means
-  it touches member PII or payments, adds/changes an external integration, changes the data
+  it touches personal data or payments, adds/changes an external integration, changes the data
   model, or alters the auth/security boundary. Produces the design a reviewer signs off by
   PR approval and the build is later verified against. Not for reversible decisions (use the
   adr skill), the thin behavioural plan the build consumes (use the plan skill), or the
@@ -22,8 +22,8 @@ writing.
 
 A Technical Design captures *how* a service or significant change will be built --
 architecture, data, security, performance, cost, operability -- so a reviewer can sign it
-off and the build can be verified against it later (the Production Readiness Check maps
-onto its sections). It sits between the PRD and the Build in the delivery lifecycle.
+off and the build can be verified against it later. It sits between the product spec and
+the Build in the delivery lifecycle.
 
 Always spell it out as **"Technical Design"**. Never abbreviate to "TDD" -- that collides
 with test-driven development, which is what the build workflow actually does.
@@ -33,15 +33,25 @@ with test-driven development, which is what the build workflow actually does.
 Write one for:
 
 - A **new service**.
-- A **significant change**: one that touches member PII or payments, adds or changes an
+- A **significant change**: one that touches personal data or payments, adds or changes an
   external integration, changes the data model, or alters the security/auth boundary.
 
 Anything smaller needs no Technical Design -- record any notable decision as an ADR (the
 `adr` skill) instead. If you are unsure whether the change qualifies, ask the human before
 drafting; a Technical Design for a trivial change is wasted ceremony, and a missing one for
-a PII/payments/auth change is a real gap.
+a personal-data/payments/auth change is a real gap.
 
 ## Process
+
+### 0. Resolve the canonical way of working
+
+The rules below are a fallback copy. The authoritative version is the engineering wiki this machine points at, resolved from `$DEV_WORKFLOW_WIKI_PATH` -- never a hardcoded path, so a personal wiki and a team wiki can differ on the same machine's plugin.
+
+```sh
+[ -n "$DEV_WORKFLOW_WIKI_PATH" ] && cat "$DEV_WORKFLOW_WIKI_PATH/ways-of-working/technical-design.md"
+```
+
+If it resolves, read it and let it win on every conflict with this skill (triggers, sections, lifecycle, sign-off, template). If the variable is unset or the file is absent, use the rules below unchanged and say which you used.
 
 ### 1. Confirm a Technical Design is warranted
 
@@ -116,22 +126,25 @@ from Overview.
 
 ### 7. Hand off for sign-off
 
-Sign-off is by **pull request approval** -- the approver and the merge are the record. Tell
-the human the level the change needs:
+- **Team repo**: sign-off is by **pull request approval** -- the approver and the merge are the record. Output the design file path so it can be committed and raised as a PR.
+- **Solo repo**: there is no approver, so the design itself is the sign-off. It exists to make the human argue with themselves before the code makes the argument expensive. Say so: write it, sit on it, then build.
 
-- New service, or a change touching payments, PII, or the security/auth boundary:
-  **Lead engineer or above**.
-- Any other significant change: **one engineer peer review**.
+## Lifecycle
 
-Output the design file path so it can be committed and raised as a PR.
+A Technical Design describes work that has not happened yet, so the build has to retire it. Every design carries a **Status**, the only field edited after sign-off:
+
+- **Proposed** -- written, not yet approved.
+- **Accepted** -- approved, not yet built.
+- **Built** -- the change has shipped.
+- **Superseded** -- replaced by a later design. Link to it.
+- **Abandoned** -- never built. Say why in a line.
+
+The change that builds a design retires it: move the file to `docs/design/archived/`, set Status to Built with a link to the commit or PR, and fold whatever is still true into `docs/architecture/` or a runbook. Designs are archived, never deleted -- the built system is verified against the design that was committed to. A search result shows the file, not the folder, so an archived design's header has to say the work is done and link to the page that now describes the system.
 
 ## Notes
 
-- Canonical standard: the authoritative version lives at `Boundless-UK/engineering-wiki` ->
-  `ways-of-working/technical-design.md`. Keep this skill's rules and template in sync with it.
-- Template: `templates/technical-design.md` at the plugin root (bundled; the script copies
-  it). Nine fixed sections so the downstream Production Readiness Check can map onto them --
-  keep the section set and order.
+- Canonical standard: `ways-of-working/technical-design.md` in the wiki at `$DEV_WORKFLOW_WIKI_PATH` (see step 0). That page wins; this skill is the offline fallback. Do not hardcode a wiki path or repo name here -- the variable is what lets a personal wiki and a team wiki diverge.
+- Template: `templates/technical-design.md` at the plugin root (bundled; the script copies it). Nine fixed sections -- keep the section set and order so a downstream readiness check can map onto them.
 - Designs are named by slug, with no numbering or index (unlike ADRs). Re-running `new`
   with the same title errors rather than clobbering an existing design.
 - The upstream PRD is a product spec for a broader audience and stays in Word -- this skill
