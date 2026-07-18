@@ -1,0 +1,18 @@
+name: plugin-manifests
+
+on:
+  pull_request:
+    paths:
+      - "plugins/**/.claude-plugin/plugin.json"
+      - "scripts/check-no-plugin-versions.sh"
+      - ".github/workflows/plugin-manifests.yml"
+  push:
+    branches: [main]
+
+jobs:
+  no-declared-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: No top-level version in plugin manifests
+        run: ./scripts/check-no-plugin-versions.sh

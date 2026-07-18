@@ -4,10 +4,5 @@
   "author": {
     "name": "John Plummer"
   },
-  "dependencies": [
-    {
-      "name": "linear",
-      "version": "^1.0"
-    }
-  ]
+  "dependencies": ["linear"]
 }

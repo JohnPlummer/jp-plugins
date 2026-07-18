@@ -1,6 +1,5 @@
 {
   "name": "linear",
-  "version": "1.0.1",
   "description": "Full Linear tracker capability: create/update issues, status, labels, comments, search, projects, sub-issues, blocking, plus ticket-composer. Includes the five-touchpoint seam (get-ticket, set-status, branch-name, link-PR, comment) dev-workflow depends on as a native dependency. Usable standalone.",
   "author": {
     "name": "John Plummer"
