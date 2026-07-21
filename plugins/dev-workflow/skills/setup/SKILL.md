@@ -17,13 +17,13 @@ Report each step's before/after so a re-run reads clearly.
 
 ## 1. linear-server MCP (machine-level)
 
-```
+```bash
 claude mcp list
 ```
 
 If `linear-server` is absent, register it (user scope, shared across the machine's repos):
 
-```
+```bash
 claude mcp add --transport http --scope user linear-server https://mcp.linear.app/mcp
 ```
 
@@ -33,7 +33,7 @@ targets (the `LINEAR_WORKSPACE` set in step 2). If it is already present, do not
 ## 2. Linear routing -> committed `.claude/settings.json`
 
 Routing is shared repo config, so it goes in the repo's **committed** `.claude/settings.json`
-`env` (the machine default lives in `~/.zshrc.local` - see the linear plugin README). Gather it with the
+`env` (the machine default lives in `~/.zshenv.local` - see the linear plugin README). Gather it with the
 `linear` skill, do not guess:
 
 - If the repo already has the four `LINEAR_DEFAULT_TEAM_*` / `LINEAR_WORKSPACE` keys, confirm
@@ -66,7 +66,7 @@ Target shape:
 
 Preflight the required targets:
 
-```
+```bash
 make -n setup mocks build test-unit test check check-ci
 ```
 

@@ -70,10 +70,10 @@ Each phase is a skill, invoked by name (`/setup`, or namespaced `/dev-workflow:s
 
 | Context     | Set it in                             | Points at                                     |
 | ----------- | ------------------------------------- | --------------------------------------------- |
-| Any machine | `~/.zshrc.local` (`export`)           | that machine's engineering wiki, `standards/` |
+| Any machine | `~/.zshenv.local` (`export`)          | that machine's engineering wiki, `standards/` |
 | CI          | `templates/ci-review.yml` `env`       | the standards repo checked out for the job    |
 
-Export it from `~/.zshrc.local`, never from anything under `~/.claude`. That file is sourced by `.zshrc` and never committed, so each machine points at its own wiki (personal or team) under its own home directory. `~/.claude` is shared across machines through git, so a path committed there would be wrong everywhere else it synced to.
+Export it from `~/.zshenv.local`, never from anything under `~/.claude`. That file is sourced by `.zshenv` and never committed, so each machine points at its own wiki (personal or team) under its own home directory. `~/.claude` is shared across machines through git, so a path committed there would be wrong everywhere else it synced to. Use `.zshenv.local` rather than `.zshrc.local`: `.zshrc` is skipped by non-interactive shells, so a value set there is invisible to the Bash tool, which is exactly the caller that needs it.
 
 If it is unset, `review` skips the external layer and reviews against repo standards alone; `standards-check` stops and says so rather than passing against nothing.
 
@@ -85,7 +85,7 @@ Standards are the rules for the artefact. The ways of working (Technical Design,
 export DEV_WORKFLOW_WIKI_PATH="$HOME/code/personal-engineering-wiki"
 ```
 
-Export it from `~/.zshrc.local`, for the same reason as the standards path: `~/.claude` is shared across machines through git, so one machine can point at a personal wiki and another at the team wiki only if the path lives outside it. `technical-design` reads `$DEV_WORKFLOW_WIKI_PATH/ways-of-working/technical-design.md` and lets it win over the skill's own copy; with the variable unset, the skill falls back to that copy. No skill hardcodes a wiki path or repo name.
+Export it from `~/.zshenv.local`, for the same reason as the standards path: `~/.claude` is shared across machines through git, so one machine can point at a personal wiki and another at the team wiki only if the path lives outside it. `technical-design` reads `$DEV_WORKFLOW_WIKI_PATH/ways-of-working/technical-design.md` and lets it win over the skill's own copy; with the variable unset, the skill falls back to that copy. No skill hardcodes a wiki path or repo name.
 
 ## CI review
 
