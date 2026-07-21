@@ -6,15 +6,19 @@
 #      the file, not from the environment, so the repo always wins regardless of how Claude
 #      Code orders its env injection. Use it when a repo belongs to a team or workspace other
 #      than the machine default, or to pin a default project.
-#   2. Machine default - $LINEAR_* exported from ~/.zshrc.local, which is sourced by .zshrc
+#   2. Machine default - $LINEAR_* exported from ~/.zshenv.local, which is sourced by .zshenv
 #      and never committed. A machine belongs to one Linear workspace and its MCP is
 #      authenticated against that workspace, so this is the everyday default: a personal Mac
 #      resolves to the personal workspace, a work Mac to the work one.
 #      Taken from the environment when present, otherwise read straight out of the file.
-#      The file read is what makes this work under Claude Code: .zshrc runs only for
-#      interactive shells, and the Bash tool is not one, so the exports are never inherited
-#      there. They are still perfectly readable, so read them rather than declaring them
-#      missing. Values are read, never sourced, so nothing else in the file is executed.
+#      The file read is what makes this robust under Claude Code. .zshenv reaches
+#      non-interactive shells, but not unconditionally: zsh reads $ZDOTDIR/.zshenv in
+#      preference to ~/.zshenv, so any process that inherits a ZDOTDIR pointing at a
+#      directory without a .zshenv skips the machine-local file entirely. A long-running
+#      agent supervisor also pins whatever environment it started with. Reading the file
+#      directly sidesteps both. Values are read, never sourced, so nothing else runs.
+#      ~/.zshrc.local is still read as a legacy fallback: it held these exports before
+#      2026-07-21 and other machines may not have migrated yet.
 #
 # Prints KEY=VALUE lines for eval, or exits 1 naming what is missing. Never guesses a team:
 # a wrong-workspace write is hard to undo.
@@ -35,18 +39,24 @@ print(env.get(sys.argv[2], ""))
 PY
 }
 
-from_zshrc_local() {              # from_zshrc_local <KEY> -> value exported in ~/.zshrc.local
-  local file="${ZSHRC_LOCAL:-$HOME/.zshrc.local}"
-  [ -f "$file" ] || return 0
-  sed -n -E "s/^[[:space:]]*export[[:space:]]+$1=[[:space:]]*(\"([^\"]*)\"|'([^']*)'|([^[:space:]#]*)).*/\2\3\4/p" \
-    "$file" | head -1
+read_export() {                   # read_export <FILE> <KEY> -> value exported in that file
+  [ -f "$1" ] || return 0
+  sed -n -E "s/^[[:space:]]*export[[:space:]]+$2=[[:space:]]*(\"([^\"]*)\"|'([^']*)'|([^[:space:]#]*)).*/\2\3\4/p" \
+    "$1" | head -1
+}
+
+from_env_file() {                 # from_env_file <KEY> -> value from .zshenv.local, else legacy .zshrc.local
+  local val
+  val="$(read_export "${ZSHENV_LOCAL:-$HOME/.zshenv.local}" "$1")"
+  [ -n "$val" ] || val="$(read_export "${ZSHRC_LOCAL:-$HOME/.zshrc.local}" "$1")"
+  printf '%s' "$val"
 }
 
 resolve() {                       # repo binding wins, then the environment, then the file
   local key="$1" val
   val="$(from_repo "$key")"
   [ -n "$val" ] || val="${!key:-}"
-  [ -n "$val" ] || val="$(from_zshrc_local "$key")"
+  [ -n "$val" ] || val="$(from_env_file "$key")"
   printf '%s' "$val"
 }
 
@@ -65,7 +75,7 @@ missing=()
 
 if [ ${#missing[@]} -gt 0 ]; then
   echo "linear: unresolved routing: ${missing[*]}" >&2
-  echo "Export the machine default in ~/.zshrc.local (sourced by .zshrc, never committed), or" >&2
+  echo "Export the machine default in ~/.zshenv.local (sourced by .zshenv, never committed), or" >&2
   echo "bind this repo in its committed .claude/settings.json env block. Never guess a team -" >&2
   echo "wrong-workspace writes are hard to undo. See the linear plugin README, Setup." >&2
   exit 1

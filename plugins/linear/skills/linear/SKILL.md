@@ -34,11 +34,12 @@ The cascade, most specific first:
    Code. Use it when a repo belongs to a team or workspace other than the machine default, or to
    pin a default project. It is shared repo config, the same for everyone who clones the repo, and
    nothing in it is secret: auth is OAuth via the MCP and no token is stored.
-2. **Machine default** - `$LINEAR_*` exported from `~/.zshrc.local`, which `.zshrc` sources and git
+2. **Machine default** - `$LINEAR_*` exported from `~/.zshenv.local`, which `.zshenv` sources and git
    never tracks. A machine belongs to one workspace and its MCP is authenticated against that
    workspace, so this is the everyday default: a personal Mac resolves to the personal workspace and
    its team, a work Mac to the work one. It cannot live in `~/.claude` - that is shared across
-   machines through git, and this binding is not.
+   machines through git, and this binding is not. `.zshenv` rather than `.zshrc` because the latter
+   is skipped by non-interactive shells, which is what the Bash tool runs in.
 
 The script reads the repo's settings file for layer 1 rather than trusting `$LINEAR_*` in the
 environment, so a repo bound to another workspace always wins over the machine default no matter how
