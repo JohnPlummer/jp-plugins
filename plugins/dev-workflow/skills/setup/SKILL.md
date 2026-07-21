@@ -24,11 +24,26 @@ claude mcp list
 If `linear-server` is absent, register it (user scope, shared across the machine's repos):
 
 ```bash
-claude mcp add --transport http --scope user linear-server https://mcp.linear.app/mcp
+claude mcp add --transport http --scope user linear-server https://mcp.linear.app/mcp \
+  --header 'Authorization: Bearer ${LINEAR_API_KEY}'
 ```
 
-Tell the user: on first use OAuth fires - authenticate against the workspace this repo
-targets (the `LINEAR_WORKSPACE` set in step 2). If it is already present, do nothing.
+Quote the header so the shell stores the literal `${LINEAR_API_KEY}`. Claude Code expands it at
+connect time from the environment of the connecting process, so a rotated key needs no
+reconfiguration. `LINEAR_API_KEY` is a personal API key from Linear, Settings, Account, Security
+and Access, exported from `~/.zshenv.local`. It needs write access.
+
+Note the header differs by endpoint: `mcp.linear.app` wants `Bearer <key>`, while the GraphQL API
+at `api.linear.app/graphql` takes the raw key with no prefix.
+
+Drop the `--header` flag to use interactive OAuth instead, in which case tell the user that OAuth
+fires on first use and they should authenticate against the workspace this repo targets (the
+`LINEAR_WORKSPACE` set in step 2). Prefer the header on a machine whose keychain is unreliable.
+If the server is already present, do nothing.
+
+If the variable is unset, Claude Code sends the literal string `Bearer ${LINEAR_API_KEY}` and
+Linear returns 401, which surfaces as "failed to connect" with nothing pointing at the real cause.
+`check-auth` diagnoses it directly.
 
 ## 2. Linear routing -> committed `.claude/settings.json`
 
