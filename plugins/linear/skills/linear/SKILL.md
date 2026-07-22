@@ -7,7 +7,6 @@ description: |
   tracker capability dev-workflow depends on (the five touchpoints in the contract section
   below). Wraps the `linear-server` MCP (no CLI).
 context: fork
-model: sonnet
 ---
 
 # Linear

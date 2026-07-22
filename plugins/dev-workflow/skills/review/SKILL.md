@@ -4,8 +4,8 @@ description: |
   Single-pass, standards-aware, diff-oriented code review. Reviews whatever is in the
   diff regardless of author (plugin-built or hand-written) against the plugin philosophy
   plus the resolved standards cascade (external folder/repo -> repo, repo wins). Use for
-  the CI review action and as a light local pass. NOT the heavy multi-agent
-  separation-of-judgment review (that is the build workflow's Review phase, local-only).
+  the CI review action and as a light local pass. NOT the multi-agent pre-merge loop
+  with push/CI (that is the code-review skill) or the build workflow's Review phase.
 ---
 
 # review (the diff-oriented review engine)
