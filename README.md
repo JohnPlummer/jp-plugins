@@ -49,4 +49,4 @@ claude --plugin-dir ~/code/jp-plugins/plugins/dev-workflow
 ## Related
 
 - `JohnPlummer/jp-private-plugins` - the private marketplace (`jp-private`), holds `productivity`.
-- `JohnPlummer/engineering-standards` - external standards source consumed by the review cascade.
+- `JohnPlummer/notes` (`2.Areas/Engineering/standards/`) - external standards source consumed by the review cascade.
