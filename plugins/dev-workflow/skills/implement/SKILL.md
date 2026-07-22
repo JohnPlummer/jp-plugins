@@ -42,10 +42,12 @@ intent and the constraints the comments add.
 
 Invoke the **`plan`** skill:
 
-- propose a ceremony tier (light | full), human confirms (default full);
 - draft the thin plan to `docs/plans/<TICKET>-<slug>.md` (behaviour only - acceptance
   criteria per work item; NOT implementation design);
 - write only already-forced decisions as `proposed` ADRs via **`adr`**.
+
+There is no ceremony tier: `/implement` IS the full-ceremony path. A change too small
+for it should use a normal session plus `/review` instead.
 
 **HUMAN GATE:** present the plan + any proposed ADRs. Do not proceed until approved. On
 approval, flip ratified ADRs to `accepted`. Revise on feedback.

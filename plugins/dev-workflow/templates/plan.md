@@ -3,7 +3,6 @@
 {One-line summary of the change.}
 
 - **Ticket:** {link to the Linear ticket}
-- **Ceremony tier:** {light | full}
 
 ## Approach
 

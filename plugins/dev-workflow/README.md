@@ -34,7 +34,7 @@ Then take a ticket to a draft PR:
 A run stops at two human gates and is otherwise hands-off:
 
 1. **Ingest** the ticket and all its comments.
-2. **Plan**: proposes a ceremony tier (light/full) and drafts a thin committed plan file with BDD acceptance criteria. **GATE 1: you approve the plan** before any code.
+2. **Plan**: drafts a thin committed plan file with BDD acceptance criteria. **GATE 1: you approve the plan** before any code. There are no ceremony tiers - `/implement` is the full path; a change too small for it belongs in a normal session plus `/review`.
 3. **Branch + baseline** commit, Linear status to In Progress.
 4. **Build**: role-isolated TDD in a headless Workflow (test-author, implementer and judge are separate subagent contexts). Hard-to-reverse decisions surface as ADRs to ratify, then resume.
 5. **Review** the diff against philosophy + standards, then **verify** (`make check` must pass before any push).
