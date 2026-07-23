@@ -2,13 +2,13 @@
 name: implement
 description: |
   Primary orchestrator. Take a Linear ticket through the full deterministic SDLC to a draft
-  PR: ingest -> plan + ADRs -> role-isolated TDD build -> review -> verify -> draft PR, with
-  human gates. Explicit-only - this is the expensive, multi-phase pipeline; invoke with
-  /implement <TICKET>, never auto-triggered.
+  PR: ingest -> plan + ADRs -> role-isolated TDD build (review + verify run inside it) ->
+  draft PR, with human gates. Explicit-only - this is the expensive, multi-phase pipeline;
+  invoke with /implement <TICKET>, never auto-triggered.
 disable-model-invocation: true
 ---
 
-# implement <TICKET-ID>
+# implement `<TICKET-ID>`
 
 Primary orchestrator. Chains the phases below, pausing only at the human gates. The
 interactive phases (ingest, plan, PR) run here in the conversation; the build runs
@@ -42,10 +42,12 @@ intent and the constraints the comments add.
 
 Invoke the **`plan`** skill:
 
-- propose a ceremony tier (light | full), human confirms (default full);
 - draft the thin plan to `docs/plans/<TICKET>-<slug>.md` (behaviour only - acceptance
   criteria per work item; NOT implementation design);
 - write only already-forced decisions as `proposed` ADRs via **`adr`**.
+
+There is no ceremony tier: `/implement` IS the full-ceremony path. A change too small
+for it should use a normal session plus `/review` instead.
 
 **HUMAN GATE:** present the plan + any proposed ADRs. Do not proceed until approved. On
 approval, flip ratified ADRs to `accepted`. Revise on feedback.
@@ -61,7 +63,7 @@ approval, flip ratified ADRs to `accepted`. Revise on feedback.
 
 Invoke the Workflow tool on the build core:
 
-```
+```js
 Workflow({
   scriptPath: "${CLAUDE_PLUGIN_ROOT}/workflows/build-isolated-tdd.js",
   args: { ticketId: "<TICKET>", planPath: "<repo>/docs/plans/<TICKET>-<slug>.md", repoPath: "<repo>" }
@@ -69,36 +71,42 @@ Workflow({
 ```
 
 It runs per item: RED (test-author, spec only) -> GREEN (implementer) -> REFACTOR (design
-emerges) -> JUDGE (independent, spec+diff only), then parallel REVIEW and a `make check`
-VERIFY. Guarantees come from control flow, not prompting.
+emerges) -> CHECKPOINT (mechanical: verifies the test on disk is byte-identical to what
+Red authored, commits the item, extracts the ground-truth diff from git) -> JUDGE
+(independent gate, spec + ground-truth diff only), then parallel REVIEW and a
+`make check` VERIFY. Guarantees come from control flow, not prompting.
+
+**Each item lands as its own commit inside the build.** Do not add a wrap-up commit for
+the build afterwards, and never squash its per-item history.
 
 Handle the return `status`:
 
-- `complete` -> proceed to Phase 5.
+- `complete` -> surface the build's review findings and the `allGreen` verdict, run the
+  work-log reconciliation below, then proceed to Phase 5. For deeper local review before
+  the PR, run the **`review`** skill (`--heavy` wraps `code-review`) - heavy
+  separation-of-judgment review runs locally, not in CI (the Workflow tool is not
+  available in CI).
 - `needs-ratification` -> a hard-to-reverse decision surfaced. Write the MADR ADR
-  (`adr`), get the **human to ratify** (ADR -> `accepted`), then resume:
-  `Workflow({ scriptPath, resumeFromRunId: "<runId>" })` (completed agents are cached).
+  (`adr`), get the **human to ratify** (ADR -> `accepted`), then resume with the SAME
+  args plus the ratified summary:
+  `Workflow({ scriptPath, resumeFromRunId: "<runId>", args: { ...same args, ratified: ["<decision summary>"] } })`
+  (completed agents are cached; `ratified` is what lets the run continue past the stop).
+- `test-tampered` -> the test on disk is not what the test-author wrote: Green or
+  Refactor modified it. Surface the evidence diff. Never accept the modified test as the
+  new baseline; find out why it was changed, fix, and re-run.
+- `judge-gate-failed` -> the independent judge found the implementation does not satisfy
+  the spec's intent, or games the test. Surface the judge's gaps and verdict; fix the
+  spec or the plan and re-run.
 - `red-gate-failed` / `green-gate-failed` / `refactor-broke-tests` / `verify-failed` ->
   surface the evidence; fix the plan or the blocker and re-run. Do not paper over a failed
   gate.
 
-For reversible decisions the build logs work-log comments via `linear:linear` **comment**
-(best-effort; headless MCP may be absent - it logs and continues).
+**Work-log reconciliation (every terminal status):** the result's `workLog` array carries
+each reversible decision with `posted`/`ref`. Mid-run posting is best-effort (headless MCP
+may be absent), so for any entry with `posted: false`, post it now via `linear:linear`
+**comment** - Linear ends complete either way, live when the MCP was up.
 
-## Phase 5 - Review
-
-The build workflow already runs a diff-oriented review per change. Surface its findings.
-For deeper local review, run the **`review`** skill (`--heavy` wraps `code-review`) before
-opening the PR - heavy separation-of-judgment review runs locally, not in CI (the Workflow
-tool is not available in CI).
-
-## Phase 6 - Verify
-
-The build's VERIFY phase ran `make check`. Confirm `allGreen` with no regressions. Per the
-github-flow push rule, **only push when `make check` passes** - for the initial PR and
-every subsequent push.
-
-## Phase 7 - Open PR  >> GATES <<
+## Phase 5 - Open PR  >> GATES <<
 
 - Push the branch (only after `make check` green).
 - Open a **DRAFT** PR (soft, reversible publish): title `<TICKET>: <summary>`, body =
@@ -111,4 +119,4 @@ every subsequent push.
 ## Reversibility (principles in practice)
 
 Prefer the smallest in-slice diff (Phase 2). Short-lived branch, feature flag if it won't
-land in days, a named rollback noted in the PR (Phase 7). Resist shipping big.
+land in days, a named rollback noted in the PR (Phase 5). Resist shipping big.

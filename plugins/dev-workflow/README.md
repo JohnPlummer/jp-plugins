@@ -9,8 +9,8 @@ An opinionated, **deterministic** software development workflow for Claude Code.
 Takes a Linear ticket to a draft PR through fixed phases:
 
 ```text
-ticket -> plan (repo file) -> known ADRs -> [GATE] -> build (role-isolated TDD) ->
-review (diff-oriented) -> verify -> draft PR -> [GATE: mark ready]
+ticket -> plan (repo file) -> known ADRs -> [GATE] -> build (role-isolated TDD,
+per-item commits, review + verify inside) -> draft PR -> [GATE: mark ready]
 ```
 
 The pipeline ends at a **draft PR**, not a deploy - hence `/implement`, not `/ship`.
@@ -34,17 +34,16 @@ Then take a ticket to a draft PR:
 A run stops at two human gates and is otherwise hands-off:
 
 1. **Ingest** the ticket and all its comments.
-2. **Plan**: proposes a ceremony tier (light/full) and drafts a thin committed plan file with BDD acceptance criteria. **GATE 1: you approve the plan** before any code.
+2. **Plan**: drafts a thin committed plan file with BDD acceptance criteria. **GATE 1: you approve the plan** before any code. There are no ceremony tiers - `/implement` is the full path; a change too small for it belongs in a normal session plus `/review`.
 3. **Branch + baseline** commit, Linear status to In Progress.
-4. **Build**: role-isolated TDD in a headless Workflow (test-author, implementer and judge are separate subagent contexts). Hard-to-reverse decisions surface as ADRs to ratify, then resume.
-5. **Review** the diff against philosophy + standards, then **verify** (`make check` must pass before any push).
-6. **Draft PR** with `Closes: JP-123`, Linear status to In Review. **GATE 2: you mark it ready for review.**
+4. **Build**: role-isolated TDD in a headless Workflow (test-author, implementer and judge are separate subagent contexts). Each item is committed by a mechanical checkpoint that also verifies the test was never modified after authoring and hands the judge a ground-truth diff from git; the judge's verdict gates the run. Review (diff-oriented, parallel) and verify (`make check`) run inside the workflow. Hard-to-reverse decisions surface as ADRs to ratify, then resume.
+5. **Draft PR** (pushed only with `make check` green) with `Closes: JP-123`, Linear status to In Review. **GATE 2: you mark it ready for review.**
 
 You can also run any phase standalone instead of letting `/implement` chain them, e.g. `/dev-workflow:plan JP-123` to draft a plan, or `/dev-workflow:review` for a quick pass on uncommitted changes.
 
 ## The opinion (what makes it deterministic, not just nudged)
 
-- **Separation of judgment**: test-author != implementer != completion-judge, each a separate subagent context. The judge evaluates against the spec, not the tests. Enforced by the Workflow, not by prompting.
+- **Separation of judgment**: test-author != implementer != completion-judge, each a separate subagent context. The judge evaluates against the spec and a ground-truth diff a mechanical checkpoint extracts from git - never the tests or the implementer's self-report - and its verdict gates the run. Enforced by the Workflow, not by prompting.
 - **Testable by default**: no code change without a test change. Red is structurally enforced (a confirmed-failing test before any implementation).
 - **Small, reversible changes**: short-lived branches, feature flags, named rollback.
 - **Emergent design**: only behaviour (BDD acceptance criteria) is fixed up front; implementation and most architecture emerge in red -> green -> refactor. Most ADRs are discovered during the build and escalated by reversibility.
