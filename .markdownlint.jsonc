@@ -1,0 +1,29 @@
+// House markdown rules: REPO profile.
+//
+// Copy to the repo root as `.markdownlint.jsonc` and commit it.
+//
+// Why committed and not shared from a home directory: markdownlint-cli2 has no
+// user-level config. It reads `.markdownlint.*` files found from each file's
+// directory up to the cwd, and ignores `~/.markdownlintrc` entirely (that is a
+// markdownlint v1 feature). A canonical file can be pulled in via
+// `{ "extends": "~/..." }`, but that exits 2 for anyone who lacks it, which
+// means every colleague on a shared repo and every CI runner. Self-contained
+// is the only form that works for other people.
+{
+  // House rules
+  "MD013": false,                    // no line-length limit (never hard-wrap)
+  "MD024": false,                    // duplicate headings allowed
+
+  // Determinism pins: every "consistent"-by-default rule anchored to a fixed
+  // value, so the same content formats to the same bytes in any document.
+  "MD003": { "style": "atx" },       // headings: # not setext
+  "MD004": { "style": "dash" },      // unordered bullets: -
+  "MD007": { "indent": 4 },          // nested-list indent: 4 spaces
+  "MD029": { "style": "ordered" },   // ordered lists: 1. 2. 3.
+  "MD035": { "style": "---" },       // thematic breaks: ---
+  "MD046": { "style": "fenced" },    // code blocks: fenced, not indented
+  "MD048": { "style": "backtick" },  // fences: ``` not ~~~
+  "MD049": { "style": "asterisk" },  // emphasis: *italic*
+  "MD050": { "style": "asterisk" },  // strong: **bold**
+  "MD060": { "style": "compact" }    // tables: | cell | single-space padding
+}
