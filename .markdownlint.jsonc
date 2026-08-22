@@ -4,8 +4,9 @@
 //
 // Why committed and not shared from a home directory: markdownlint-cli2 has no
 // user-level config. It reads `.markdownlint.*` files found from each file's
-// directory up to the cwd, and ignores `~/.markdownlintrc` entirely (that is a
-// markdownlint v1 feature). A canonical file can be pulled in via
+// directory up to the cwd, and has no user-level or home-directory fallback.
+// (markdownlint v1 read `~/.markdownlintrc`; both that CLI and the file were
+// retired on 2026-08-22.) A canonical file can be pulled in via
 // `{ "extends": "~/..." }`, but that exits 2 for anyone who lacks it, which
 // means every colleague on a shared repo and every CI runner. Self-contained
 // is the only form that works for other people.
