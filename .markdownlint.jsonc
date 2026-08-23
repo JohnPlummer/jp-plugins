@@ -1,17 +1,8 @@
-// House markdown rules: REPO profile.
-//
-// Copy to the repo root as `.markdownlint.jsonc` and commit it.
-//
-// Why committed and not shared from a home directory: markdownlint-cli2 has no
-// user-level config. It reads `.markdownlint.*` files found from each file's
-// directory up to the cwd, and has no user-level or home-directory fallback.
-// (markdownlint v1 read `~/.markdownlintrc`; both that CLI and the file were
-// retired on 2026-08-22.) A canonical file can be pulled in via
-// `{ "extends": "~/..." }`, but that exits 2 for anyone who lacks it, which
-// means every colleague on a shared repo and every CI runner. Self-contained
-// is the only form that works for other people.
 {
-  // House rules
+  // Markdown formatting rules for this repo.
+  //
+  // markdownlint enables all rules by default; these are the only overrides.
+
   "MD013": false,                    // no line-length limit (never hard-wrap)
   "MD024": false,                    // duplicate headings allowed
 
