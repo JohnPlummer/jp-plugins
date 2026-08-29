@@ -14,8 +14,8 @@
 //        - Judge (completion): sees the SPEC + the checkpoint's ground-truth DIFF
 //          ONLY -- never the test internals or the implementer's reasoning -- and its
 //          verdict is a GATE, not a report note.
-//   3. Evidence integrity -- a mechanical per-item CHECKPOINT verifies the test on
-//      disk is byte-identical to what Red authored (mismatch -> test-tampered gate),
+//   3. Evidence integrity -- a mechanical per-item CHECKPOINT verifies that EVERY test
+//      file on disk is byte-identical to what Red authored (mismatch -> test-tampered),
 //      commits the item (small reversible changes land in the build's own history),
 //      and extracts the judge's diff from git rather than trusting the implementer's
 //      self-report.
@@ -77,12 +77,24 @@ const RED = {
   properties: {
     failed: { type: 'boolean', description: 'true if the test ran and FAILED' },
     failsForRightReason: { type: 'boolean', description: 'true if it fails because the behaviour is missing, NOT a syntax/setup error' },
-    testFile: { type: 'string' },
-    testCode: { type: 'string', description: 'the full test source written' },
+    testFiles: {
+      type: 'array',
+      description: 'EVERY test file written for this item, one entry per file. Never concatenate two files into one entry, and never comment one file out inside another.',
+      minItems: 1,
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          path: { type: 'string', description: 'path of the test file, as written' },
+          content: { type: 'string', description: 'the full test source written to that path' },
+        },
+        required: ['path', 'content'],
+      },
+    },
     failureOutput: { type: 'string', description: 'verbatim test-runner failure output' },
     notes: { type: 'string' },
   },
-  required: ['failed', 'failsForRightReason', 'testFile', 'testCode', 'failureOutput'],
+  required: ['failed', 'failsForRightReason', 'testFiles', 'failureOutput'],
 }
 
 const GREEN = {
@@ -125,10 +137,10 @@ const CHECKPOINT = {
   type: 'object',
   additionalProperties: false,
   properties: {
-    testIntact: { type: 'boolean', description: 'the test file on disk is byte-identical to what the test-author returned' },
-    tamperEvidence: { type: 'string', description: 'unified diff between the authored test and the file on disk, when not intact' },
+    testIntact: { type: 'boolean', description: 'EVERY test file on disk is byte-identical to what the test-author returned' },
+    tamperEvidence: { type: 'string', description: 'for each file that differs, its path followed by the unified diff between the authored test and the file on disk' },
     commit: { type: 'string', description: 'hash of the commit created for this item (empty when tampered)' },
-    implDiff: { type: 'string', description: 'git show of the item commit with the test file excluded -- the ground-truth implementation diff' },
+    implDiff: { type: 'string', description: 'git show of the item commit with every test file excluded -- the ground-truth implementation diff' },
   },
   required: ['testIntact', 'commit', 'implDiff'],
 }
@@ -223,17 +235,27 @@ for (const item of plan.items) {
 
   // RED -- test-author. SPEC ONLY. Must not write implementation.
   const red = await agent(
-    `${REPO_RULE}\nYou are the TEST-AUTHOR. You may ONLY write test code, never implementation.\n\nSPEC (acceptance criteria):\n${item.spec}\n\nWrite a failing automated test that encodes this spec. Then run \`${TEST_CMD}\` and capture the output. Do NOT write or stub any implementation - it is correct and expected that the unit under test does not exist yet.\n\nfailsForRightReason = true when the test fails because the behaviour/unit is not implemented yet (including "module not found" or "x is not a function" for the unit you are testing). failsForRightReason = false ONLY when the failure is a defect in the TEST itself (a typo, a bad import path in the test, an assertion that would fail even against a correct implementation). Return the test file path, the full test source, whether it failed, whether it failed for the right reason, and the verbatim failure output.`,
+    `${REPO_RULE}\nYou are the TEST-AUTHOR. You may ONLY write test code, never implementation.\n\nSPEC (acceptance criteria):\n${item.spec}\n\nWrite a failing automated test that encodes this spec. Then run \`${TEST_CMD}\` and capture the output. Do NOT write or stub any implementation - it is correct and expected that the unit under test does not exist yet.\n\nfailsForRightReason = true when the test fails because the behaviour/unit is not implemented yet (including "module not found" or "x is not a function" for the unit you are testing). failsForRightReason = false ONLY when the failure is a defect in the TEST itself (a typo, a bad import path in the test, an assertion that would fail even against a correct implementation).\n\nReturn testFiles as ONE ENTRY PER FILE you actually wrote, each with its path and full source. Most items need one file; write more only when the spec genuinely requires it. Report every file you wrote as its own entry -- never concatenate two files into one entry, never comment one file out inside another, and never omit a file you wrote. A later mechanical step compares each entry byte-for-byte against disk, so an entry that does not correspond exactly to one file on disk fails the build. Also return whether it failed, whether it failed for the right reason, and the verbatim failure output.`,
     { phase: 'Red', schema: RED, label: `red:${item.id}` },
   )
   if (!red.failed || !red.failsForRightReason) {
     return { status: 'red-gate-failed', at: item.id, red, built, workLog }
   }
 
+  // Derived once: the downstream roles need the test set rendered, listed, and as a
+  // git pathspec. One test file stays the common case; the list just no longer forces
+  // the author to smuggle extra files into a single string (JP-215).
+  const testPaths = red.testFiles.map((f) => f.path)
+  const testList = testPaths.join(', ')
+  const testBlock = red.testFiles
+    .map((f) => `${f.path}:\n\`\`\`\n${f.content}\n\`\`\``)
+    .join('\n\n')
+  const testExcludes = testPaths.map((p) => `':(exclude)${p}'`).join(' ')
+
   // GREEN -- implementer. Sees the test it must pass, but did NOT author it. Its diff
   // is NOT collected -- the judge gets ground truth from the checkpoint instead.
   const green = await agent(
-    `${REPO_RULE}\nYou are the IMPLEMENTER. A test has already been written by someone else (you did not write it and must not change it).\n\nSPEC:\n${item.spec}\n\nThe test you must satisfy (already on disk at ${red.testFile}):\n\`\`\`\n${red.testCode}\n\`\`\`\n\nWrite the MINIMAL implementation to make this test pass. YAGNI -- add no functionality the spec did not ask for. Do not modify the test. Run \`${TEST_CMD}\` and confirm it passes. Return whether it passed and the implementation file path.`,
+    `${REPO_RULE}\nYou are the IMPLEMENTER. The test(s) below were written by someone else (you did not write them and must not change them).\n\nSPEC:\n${item.spec}\n\nThe test(s) you must satisfy, already on disk:\n\n${testBlock}\n\nWrite the MINIMAL implementation to make them pass. YAGNI -- add no functionality the spec did not ask for. Do not modify any test file (${testList}). Run \`${TEST_CMD}\` and confirm it passes. Return whether it passed and the implementation file path.`,
     { phase: 'Green', schema: GREEN, label: `green:${item.id}` },
   )
   if (!green.passed) {
@@ -242,7 +264,7 @@ for (const item of plan.items) {
 
   // REFACTOR -- design emerges here. Tests stay green. Report significant decisions.
   const refac = await agent(
-    `${REPO_RULE}\nYou are refactoring. The tests are green; keep them green (run \`${TEST_CMD}\` after each change). Let the design emerge: extract abstractions that are now evident, remove duplication (DRY), simplify (YAGNI). This is the design step, not cosmetic tidying. Do not modify the test file at ${red.testFile}. Report any architecturally significant decision you were forced to make and whether it is reversible (reversible = local and cheap to undo later; not reversible = hard to undo, e.g. a public API shape, a data format, a dependency choice). If none, return an empty decisions array.`,
+    `${REPO_RULE}\nYou are refactoring. The tests are green; keep them green (run \`${TEST_CMD}\` after each change). Let the design emerge: extract abstractions that are now evident, remove duplication (DRY), simplify (YAGNI). This is the design step, not cosmetic tidying. Do not modify any test file (${testList}). Report any architecturally significant decision you were forced to make and whether it is reversible (reversible = local and cheap to undo later; not reversible = hard to undo, e.g. a public API shape, a data format, a dependency choice). If none, return an empty decisions array.`,
     { phase: 'Refactor', schema: REFACTOR, label: `refactor:${item.id}` },
   )
   if (!refac.stillGreen) {
@@ -276,7 +298,7 @@ for (const item of plan.items) {
   // CHECKPOINT -- mechanical, no judgment. Test-tamper gate + per-item commit +
   // ground-truth diff for the judge.
   const cp = await agent(
-    `${REPO_RULE}\nYou are a mechanical CHECKPOINT for work item ${item.id}. Perform exactly these steps.\n\n1. TEST INTEGRITY. The test-author wrote ${red.testFile} with exactly this content:\n\`\`\`\n${red.testCode}\n\`\`\`\nCompare the file on disk against that content: write the expected content to a temp file outside the repo, then run \`diff <(printf '%s' "$(cat EXPECTED)") <(printf '%s' "$(cat ACTUAL)")\` -- the command substitution strips trailing end-of-file newlines on both sides, which are the one legitimate round-trip artefact. ANY other difference, of any size, is tampering: return testIntact:false, the unified diff as tamperEvidence, and empty strings for commit and implDiff -- and do NOT commit.\n\n2. COMMIT. If intact, stage and commit all current changes as one conventional commit for this item: \`type(scope): desc\` per github-flow, type matching the nature of "${item.desc}". Return the commit hash.\n\n3. GROUND-TRUTH DIFF. Return the implementation diff verbatim from \`git show HEAD -- . ':(exclude)${red.testFile}'\` (the item's commit with the test file excluded).`,
+    `${REPO_RULE}\nYou are a mechanical CHECKPOINT for work item ${item.id}. Perform exactly these steps.\n\n1. TEST INTEGRITY. The test-author wrote ${red.testFiles.length} test file(s), each with exactly the content shown below.\n\n${testBlock}\n\nCheck EACH file SEPARATELY against its own expected content. For each one: write that file's expected content to its own temp file outside the repo, then run \`diff <(printf '%s' "$(cat EXPECTED)") <(printf '%s' "$(cat ACTUAL)")\` -- the command substitution strips trailing end-of-file newlines on both sides, which are the one legitimate round-trip artefact. Never compare one file against another file's content, and never concatenate the expected contents before comparing. ANY other difference, of any size, in ANY of the files is tampering: return testIntact:false, tamperEvidence as the offending path followed by its unified diff (list every file that differs), and empty strings for commit and implDiff -- and do NOT commit. Return testIntact:true only when EVERY file matches.\n\n2. COMMIT. If intact, stage and commit all current changes as one conventional commit for this item: \`type(scope): desc\` per github-flow, type matching the nature of "${item.desc}". Return the commit hash.\n\n3. GROUND-TRUTH DIFF. Return the implementation diff verbatim from \`git show HEAD -- . ${testExcludes}\` (the item's commit with EVERY test file excluded).`,
     { phase: 'Checkpoint', schema: CHECKPOINT, label: `checkpoint:${item.id}`, model: 'haiku', effort: 'low' },
   )
   if (!cp.testIntact) {

@@ -71,7 +71,7 @@ Workflow({
 ```
 
 It runs per item: RED (test-author, spec only) -> GREEN (implementer) -> REFACTOR (design
-emerges) -> CHECKPOINT (mechanical: verifies the test on disk is byte-identical to what
+emerges) -> CHECKPOINT (mechanical: verifies every test file on disk is byte-identical to what
 Red authored, commits the item, extracts the ground-truth diff from git) -> JUDGE
 (independent gate, spec + ground-truth diff only), then parallel REVIEW and a
 `make check` VERIFY. Guarantees come from control flow, not prompting.
@@ -91,7 +91,7 @@ Handle the return `status`:
   args plus the ratified summary:
   `Workflow({ scriptPath, resumeFromRunId: "<runId>", args: { ...same args, ratified: ["<decision summary>"] } })`
   (completed agents are cached; `ratified` is what lets the run continue past the stop).
-- `test-tampered` -> the test on disk is not what the test-author wrote: Green or
+- `test-tampered` -> a test file on disk is not what the test-author wrote: Green or
   Refactor modified it. Surface the evidence diff. Never accept the modified test as the
   new baseline; find out why it was changed, fix, and re-run.
 - `judge-gate-failed` -> the independent judge found the implementation does not satisfy

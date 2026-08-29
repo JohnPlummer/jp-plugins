@@ -23,7 +23,7 @@ The workflow guarantees by control flow (not prompting):
 
 - **TDD order** - the implementer cannot run until the test-author returns a confirmed-failing test.
 - **Separation of judgment** - test-author (spec only) != implementer (sees the test, did not write it) != completion-judge (spec + ground-truth diff only), and the judge's verdict is a gate.
-- **Evidence integrity** - a mechanical per-item checkpoint verifies the test on disk is byte-identical to what the test-author wrote (mismatch -> `test-tampered`), commits the item, and extracts the judge's diff from git rather than trusting the implementer's self-report.
+- **Evidence integrity** - a mechanical per-item checkpoint verifies every test file on disk is byte-identical to what the test-author wrote (mismatch -> `test-tampered`), commits the item, and extracts the judge's diff from git rather than trusting the implementer's self-report.
 
 `repoPath` and `planPath` are required (the workflow fails fast on missing args and never
 improvises a target). `ticketId` is optional - omit it to run without Linear (work-log
