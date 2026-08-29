@@ -52,13 +52,14 @@ See [`docs/philosophy.md`](./docs/philosophy.md).
 
 ## Skills
 
-Each phase is a skill, invoked by name (`/setup`, or namespaced `/dev-workflow:setup`). The heavy, side-effecting ones (`implement`, `build`, `setup`) are explicit-only (`disable-model-invocation`); the lighter ones (`plan`, `adr`, `review`) may also auto-trigger when you describe the task. There are no separate command wrappers - commands are merged into skills in Claude Code.
+Each phase is a skill, invoked by name (`/setup`, or namespaced `/dev-workflow:setup`). The heavy, side-effecting ones (`implement`, `build`, `setup`, `em`) are explicit-only (`disable-model-invocation`); the lighter ones (`plan`, `adr`, `review`) may also auto-trigger when you describe the task. There are no separate command wrappers - commands are merged into skills in Claude Code.
 
 - `/setup` - onboard the current repo (linear-server MCP, Linear routing in committed `.claude/settings.json`, Makefile contract, `docs/plans` + `docs/decisions`, optional CI review). Idempotent; run once per repo before `/implement`.
 - `/implement <TICKET>` - primary orchestrator (chains all phases + human gates).
 - `/plan <TICKET>` - ticket -> thin committed plan file with BDD acceptance criteria.
 - `/technical-design "<name>"` - interview -> brainstorm -> draft a Technical Design doc into `docs/design/` for a new service or significant change (PII/payments/integration/data-model/auth). Signed off by PR approval.
 - `/build <TICKET> <PLAN-PATH>` - run the role-isolated TDD workflow on an approved plan, e.g. `/build JP-123 docs/plans/JP-123-rate-limiter.md`.
+- `/em <LINEAR-PROJECT>` - supervise several `/build` runs at once: claims tickets whose plan file is already approved, one worktree each, watches for stalls, throttles on open-PR count, opens draft PRs. State lives in `docs/initiatives/<project>.md` so it survives compaction.
 - `/review [PR] [--heavy]` - diff-oriented review (any author) against philosophy + standards; light single-pass by default, `--heavy` for the local multi-agent pass. Same engine runs in CI.
 - `/adr "<title>"` - write a MADR 4.0.0 ADR, e.g. `/adr "Use Redis for the rate limiter"`.
 - `/standards-check [target]` - check a diff, a plan, or a file against the resolved standards only (no philosophy layer, no review criteria). The narrow check `/review` subsumes.
