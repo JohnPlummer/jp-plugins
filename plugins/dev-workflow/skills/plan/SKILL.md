@@ -47,6 +47,19 @@ content.
      red->green->refactor->judge cycle, so each needs a clear **Spec (acceptance criteria)**
      block (BDD Given/When/Then or plain observable behaviour), worked examples where they
      sharpen intent, and an explicit out-of-scope (YAGNI) line.
+
+     **The criteria must cover the behaviour, not merely illustrate it.** Worked examples go
+     in the examples block, never in place of a criterion. Four checks:
+
+     1. **State the rule, not just examples.** An example pins one point, a rule constrains
+        the domain. Criteria that are only input/output pairs let any function passing
+        through those points clear every gate.
+     2. **Bound the input domain.** Say what is in and what is out. Defects collect in the
+        region the criteria never described.
+     3. **Include a boundary or near-boundary case.** Exact powers, round numbers and
+        well-formed input prove nothing about the edges, which is where implementations bend.
+     4. **Make negative cases near-misses.** An obviously invalid input proves only that a
+        guard exists. A plausible-but-wrong one proves the guard is correct.
    - 4b. **Known decisions** - only decisions already forced before any code. For each, run
      the `adr` skill (status `proposed`) and list it under "Known decisions". Most
      decisions are discovered later in the build, not here - keep this short.
@@ -69,5 +82,9 @@ content.
   and Spec block). Keep the `### <TICKET>-x` + **Spec** structure from the template.
 - Reversible work-log decisions ("chose A over B") are **Linear comments**, not plan
   content and not ADRs.
-- Thin beats thorough here: over-planning constrains the design before the build has the
-  information to make it well.
+- Thin beats thorough **on design**: over-planning constrains the design before the build
+  has the information to make it well. It does NOT mean thin on behaviour. The plan can be
+  thin, but the acceptance criteria must cover the required behaviour. Under-specified
+  behaviour is not thin, it is unfinished, and it disarms every gate downstream without
+  showing a failure: the test-author can only test what it was told, so a weak spec yields
+  weak tests, and the judge then approves an implementation that satisfies them.

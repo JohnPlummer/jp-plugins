@@ -22,6 +22,12 @@ The build reads each item's id (the `### {TICKET}-x` heading), its short desc, a
 
 **Spec (acceptance criteria):**
 
+<!-- State RULES, not examples. An example pins one point, a rule constrains the domain.
+     Cover four things: the rule itself, the bounds of the input domain (what is in and
+     what is out), at least one boundary or near-boundary case, and negative cases that
+     are near-misses rather than obvious garbage. Criteria that are only input/output
+     pairs let any function passing through those points clear every gate downstream. -->
+
 - {BDD-style criterion: Given/When/Then, or a plain observable behaviour}
 - {criterion}
 
