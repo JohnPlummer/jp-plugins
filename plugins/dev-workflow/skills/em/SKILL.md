@@ -19,9 +19,10 @@ It supervises, it does not design. Every ticket it touches already has an approv
 
 1. **Tracker config + workspace safety** - run the config/safety check from the `linear:linear` skill before any MCP touchpoint. Wrong workspace, stop.
 2. **Clean working tree on the integration branch.** The EM never edits code itself.
-3. **Makefile contract** - `make -n setup test-unit check`. Missing targets means the ICs cannot verify, so run `/setup` first.
-4. **The verifier covers the code the ICs will write.** Read what `check` actually runs. A check that skips the workspace the tickets touch is worse than no check, because every run comes back green. Stop and say so rather than proceeding.
-5. **At least one ready ticket** (below). A dry backlog is a halt condition, not an error.
+3. **`/.claude/worktrees` is gitignored.** Worktrees live inside the repo, so without this every claim adds an embedded git repository to the index and the next `git add` sweeps it in. Check with `git check-ignore .claude/worktrees` and add the entry before claiming anything.
+4. **Makefile contract** - `make -n setup test-unit check`. Missing targets means the ICs cannot verify, so run `/setup` first.
+5. **The verifier covers the code the ICs will write.** Read what `check` actually runs. A check that skips the workspace the tickets touch is worse than no check, because every run comes back green. Stop and say so rather than proceeding.
+6. **At least one ready ticket** (below). A dry backlog is a halt condition, not an error.
 
 ## Ready means the plan file exists
 
@@ -68,6 +69,8 @@ Repeat until a halt condition fires.
     ```
 
     `running` - leave it. `stalled` - stop the task, record why, free the claim. `done` - the Workflow's own return value is the authority on whether it succeeded, so handle its `status` per step 5.
+
+    A non-zero exit is a fourth state, not an error to ignore: the journal is unreadable, so the run can be neither confirmed alive nor confirmed dead. Mark the ticket needs-human and say the claim cannot be resolved. Do **not** free the claim on an unreadable run. Freeing it risks a second IC on a ticket the first may still be building, which is the one failure worktree isolation cannot save you from.
 5. **Land or escalate**, by the IC's returned status:
     - `complete` -> push the branch, open a **draft** PR (`Closes: <TICKET>` in the body), link it via `linear:linear` **link-PR**, set status in-review. Reconcile the run's `workLog`: any entry with `posted: false` gets its comment posted now.
     - `needs-ratification` -> a hard-to-reverse decision. Write it to `docs/initiatives/decisions-needed/<TICKET>.md` and move to the next ticket. Do not wake the human and do not ratify it yourself.
