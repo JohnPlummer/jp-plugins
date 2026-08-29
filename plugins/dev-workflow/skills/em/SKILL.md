@@ -62,6 +62,8 @@ Repeat until a halt condition fires.
     ```
 
     Record the returned task id, run id and transcript dir in the progress file **before** launching anything else. An unrecorded run is an orphan: still burning tokens, invisible to the next cycle.
+
+    If the tool refuses the path (`scriptPath must be ... a file you can already read`), the plugin root is not among this session's working directories. Add it and retry: `/add-dir` in session, or `--add-dir` at launch. **Do not work around it by copying the workflow script somewhere readable.** The copy stops tracking `/plugin update`, so the fleet quietly runs a version nobody maintains, and the divergence is invisible from the run output. Observed 2026-08-29: the plugin path works from an ordinary session and was refused in a background-job session, so treat the refusal as an environment difference rather than a wrong path.
 4. **Observe.** For each in-flight run:
 
     ```bash
