@@ -1,0 +1,20 @@
+#!/bin/bash
+# PreToolUse hook: deny Linear MCP calls made outside the linear skill.
+#
+# The skill runs forked (context: fork), so its tool calls carry agent_id.
+# Main-session calls have no agent_id and are sent back to the skill.
+
+input=$(cat)
+agent_id=$(echo "$input" | jq -r '.agent_id // empty')
+
+if [[ -n "$agent_id" ]]; then
+    exit 0
+fi
+
+jq -n '{
+    hookSpecificOutput: {
+        hookEventName: "PreToolUse",
+        permissionDecision: "deny",
+        permissionDecisionReason: "Direct Linear MCP calls are blocked. Use the linear:linear skill. If the skill failed, invoke it again; if it keeps failing, report the error to the user."
+    }
+}'

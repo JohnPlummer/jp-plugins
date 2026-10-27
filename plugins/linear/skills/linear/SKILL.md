@@ -17,6 +17,12 @@ rewriting ticket *content*, it chains to [`ticket-composer`](../ticket-composer/
 first; for everything else (status, assignment, labels, comments, queries) it calls the MCP
 directly.
 
+The plugin's `linear-guard` hook denies `linear-server` calls made outside this skill. The skill runs forked, so its calls carry an `agent_id` and pass the guard. Main-session calls do not.
+
+## MCP not connected
+
+At session start the `linear-server` MCP can still be connecting when this skill runs, so its tools are missing from the fork. If the tools cannot be loaded, stop and return exactly: `Linear MCP not connected yet. Invoke the linear:linear skill again.` Do not guess, work around it, or report the task as done. The caller re-invokes the skill.
+
 ## Config + workspace safety (run once per session, before any MCP touchpoint)
 
 Resolve routing with the script. It prints `KEY=VALUE` lines, or exits non-zero naming what is
@@ -67,13 +73,13 @@ several projects. It is a soft default, always overridable per ticket - never a 
 Linear has no "Epic" object. Map Jira concepts onto Linear's hierarchy
 (project -> milestone -> issue -> sub-issue):
 
-| Jira             | Linear entity | MCP tool                     |
+| Jira | Linear entity | MCP tool |
 | ---------------- | ------------- | ---------------------------- |
-| Epic             | Project       | `save_project`               |
-| Phase of an epic | Milestone     | `save_milestone`             |
-| Story / Task     | Issue         | `save_issue`                 |
-| Sub-task         | Sub-issue     | `save_issue` with `parentId` |
-| Comment          | Comment       | `save_comment`               |
+| Epic | Project | `save_project` |
+| Phase of an epic | Milestone | `save_milestone` |
+| Story / Task | Issue | `save_issue` |
+| Sub-task | Sub-issue | `save_issue` with `parentId` |
+| Comment | Comment | `save_comment` |
 
 A product or surface is not a layer here. It is carried by an Area label (see Labels), not by
 a project, so cross-product work stays filterable across projects.
@@ -126,26 +132,26 @@ stop on the first error and report before continuing.
 Each is `mcp__linear-server__<tool>`. Only pass the fields you want to change; omitted fields
 are left unchanged.
 
-| Operation           | Tool + key params                                                                                                                                                                                                                             |
+| Operation | Tool + key params |
 | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Create issue        | `save_issue` (title, team, description, state, priority, labels, project, assignee). If the caller gives no project and `$LINEAR_DEFAULT_PROJECT_ID` is set, default `project` to it (note which project you applied; let the user override). |
-| View issue          | `get_issue` (id, includeRelations: true)                                                                                                                                                                                                      |
-| Update issue        | `save_issue` (id + changed fields)                                                                                                                                                                                                            |
-| Add comment         | `save_comment` (issueId, body)                                                                                                                                                                                                                |
-| List comments       | `list_comments` (issueId)                                                                                                                                                                                                                     |
-| Search (filters)    | `list_issues` (team, state, assignee, label, project)                                                                                                                                                                                         |
-| Search (text)       | `search` (query, type: "issue")                                                                                                                                                                                                               |
-| List sub-tasks      | `list_issues` (parentId)                                                                                                                                                                                                                      |
-| Create project      | `save_project` (name, addTeams, description, lead, priority). Always set a description and lead - an empty project shell is a smell. `icon` must be a valid Linear icon name, not a Unicode emoji - omit if unsure.                           |
-| Link to project     | `save_issue` (id, project)                                                                                                                                                                                                                    |
-| Create milestone    | `save_milestone` (project, name)                                                                                                                                                                                                              |
-| Update milestone    | `save_milestone` (id + changed fields)                                                                                                                                                                                                        |
-| List milestones     | `list_milestones` (project)                                                                                                                                                                                                                   |
-| Set issue milestone | `save_issue` (id, milestone)                                                                                                                                                                                                                  |
-| Set parent          | `save_issue` (id, parentId)                                                                                                                                                                                                                   |
-| List cycles         | `list_cycles` (teamId, type: current/previous/next)                                                                                                                                                                                           |
-| Schedule into cycle | `save_issue` (id, cycle - name, number, or ID; resolve "current" via `list_cycles` type=current)                                                                                                                                              |
-| Block/unblock       | `save_issue` (id, blocks/blockedBy arrays; `removeBlocks`/`removeBlockedBy` to remove - append-only)                                                                                                                                          |
+| Create issue | `save_issue` (title, team, description, state, priority, labels, project, assignee). If the caller gives no project and `$LINEAR_DEFAULT_PROJECT_ID` is set, default `project` to it (note which project you applied; let the user override). |
+| View issue | `get_issue` (id, includeRelations: true) |
+| Update issue | `save_issue` (id + changed fields) |
+| Add comment | `save_comment` (issueId, body) |
+| List comments | `list_comments` (issueId) |
+| Search (filters) | `list_issues` (team, state, assignee, label, project) |
+| Search (text) | `search` (query, type: "issue") |
+| List sub-tasks | `list_issues` (parentId) |
+| Create project | `save_project` (name, addTeams, description, lead, priority). Always set a description and lead - an empty project shell is a smell. `icon` must be a valid Linear icon name, not a Unicode emoji - omit if unsure. |
+| Link to project | `save_issue` (id, project) |
+| Create milestone | `save_milestone` (project, name) |
+| Update milestone | `save_milestone` (id + changed fields) |
+| List milestones | `list_milestones` (project) |
+| Set issue milestone | `save_issue` (id, milestone) |
+| Set parent | `save_issue` (id, parentId) |
+| List cycles | `list_cycles` (teamId, type: current/previous/next) |
+| Schedule into cycle | `save_issue` (id, cycle - name, number, or ID; resolve "current" via `list_cycles` type=current) |
+| Block/unblock | `save_issue` (id, blocks/blockedBy arrays; `removeBlocks`/`removeBlockedBy` to remove - append-only) |
 
 `list_issues` with no filter returns only the most-recently-updated set. Pass `team` and
 `limit` for the full set, and page via `cursor` for large results.

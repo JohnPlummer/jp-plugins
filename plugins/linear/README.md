@@ -9,6 +9,10 @@ The Linear tracker capability for Claude Code. A full Linear manager, plus the t
 
 Integration is **MCP, not CLI**: the official `linear-server` remote MCP (`https://mcp.linear.app/mcp`, OAuth). `branch-name` is the one deterministic script ([scripts/branch-name.sh](./scripts/branch-name.sh)).
 
+## Hooks
+
+- **`linear-guard`** ([hooks/linear-guard](./hooks/linear-guard)) - denies `linear-server` and `linear-boundless` MCP calls made outside the `linear` skill, so Linear work always goes through the skill's labels, routing and workspace checks. The skill runs forked, and forked calls carry an `agent_id` in the hook input. Main-session calls have none and are denied with a message to invoke the skill.
+
 ## Usage
 
 Invoke explicitly with `/linear:linear`, or just describe the task and let it trigger. It speaks natural language and resolves IDs, statuses and labels at runtime (no hardcoded taxonomy). Examples:
@@ -37,14 +41,14 @@ Routing resolves through `skills/linear/scripts/resolve-routing.sh`, as a two-la
 
 The script reads the repo's settings file directly for layer 2 rather than trusting `$LINEAR_*` in the environment, so a repo bound to another workspace always beats the machine default regardless of how Claude Code orders its env injection - the inversion that would cause a wrong-workspace write. If neither layer resolves, the script fails and the skill stops rather than guessing a team.
 
-| Key                           | What                                         | Example            |
+| Key | What | Example |
 | ----------------------------- | -------------------------------------------- | ------------------ |
-| `LINEAR_WORKSPACE`            | workspace slug (the OAuth target)            | `personal-jpp`     |
-| `LINEAR_DEFAULT_TEAM_ID`      | team UUID (the safety check)                 | `537fb028-…`       |
-| `LINEAR_DEFAULT_TEAM_NAME`    | team name                                    | `JP`               |
-| `LINEAR_DEFAULT_TEAM_PREFIX`  | issue ID prefix                              | `JP` (-> `JP-123`) |
-| `LINEAR_DEFAULT_PROJECT_ID`   | *optional* - default project for new tickets | `8db96294-…`       |
-| `LINEAR_DEFAULT_PROJECT_NAME` | *optional* - readable name for the above     | `Get Out More`     |
+| `LINEAR_WORKSPACE` | workspace slug (the OAuth target) | `personal-jpp` |
+| `LINEAR_DEFAULT_TEAM_ID` | team UUID (the safety check) | `537fb028-…` |
+| `LINEAR_DEFAULT_TEAM_NAME` | team name | `JP` |
+| `LINEAR_DEFAULT_TEAM_PREFIX` | issue ID prefix | `JP` (-> `JP-123`) |
+| `LINEAR_DEFAULT_PROJECT_ID` | *optional* - default project for new tickets | `8db96294-…` |
+| `LINEAR_DEFAULT_PROJECT_NAME` | *optional* - readable name for the above | `Get Out More` |
 
 Example `<repo>/.claude/settings.json`:
 

@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__linear-server__.*|mcp__linear-boundless__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/linear-guard"
+          }
+        ]
+      }
+    ]
+  }
+}
