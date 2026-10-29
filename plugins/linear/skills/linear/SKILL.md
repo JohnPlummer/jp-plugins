@@ -19,6 +19,10 @@ directly.
 
 The plugin's `linear-guard` hook denies `linear-server` calls made outside this skill. The skill runs forked, so its calls carry an `agent_id` and pass the guard. Main-session calls do not.
 
+## What the fork receives
+
+The fork sees this skill's text and the arguments it was invoked with. It does not see the caller's conversation. Ticket ids, titles, description content and anything else the operation needs must be in the arguments. If something required is missing, return and name it. Do not guess it or ask the user, because the user is not in this conversation.
+
 ## MCP not connected
 
 At session start the `linear-server` MCP can still be connecting when this skill runs, so its tools are missing from the fork. If the tools cannot be loaded, stop and return exactly: `Linear MCP not connected yet. Invoke the linear:linear skill again.` Do not guess, work around it, or report the task as done. The caller re-invokes the skill.
@@ -29,9 +33,17 @@ Resolve routing with the script. It prints `KEY=VALUE` lines, or exits non-zero 
 missing. Do not read the env keys directly - the script owns the cascade:
 
 ```bash
-eval "$("$CLAUDE_PLUGIN_ROOT/skills/linear/scripts/resolve-routing.sh")" || exit 1
-echo "workspace=$LINEAR_WORKSPACE team=$LINEAR_DEFAULT_TEAM_NAME prefix=$LINEAR_DEFAULT_TEAM_PREFIX"
+routing_script="${CLAUDE_SKILL_DIR}/scripts/resolve-routing.sh"
+if [ ! -f "$routing_script" ]; then
+  echo "linear: routing script not found at '$routing_script'" >&2
+  exit 1
+fi
+routing="$(bash "$routing_script")" || exit 1
+eval "$routing"
+printf '%s\n' "$routing"
 ```
+
+If this block exits non-zero, stop and return its error to the caller. Never route from `$LINEAR_*` values in the environment and never look a team up yourself: the script is the only source of routing.
 
 The cascade, most specific first:
 
@@ -162,7 +174,7 @@ For a new ticket or a description/title/AC rewrite, chain to `ticket-composer` f
 create/update:
 
 1. Invoke the [`ticket-composer`](../ticket-composer/SKILL.md) skill - it interviews the
-   user (interactive) or extracts from context (agent call), and for updates takes the
+   user (interactive) or extracts from the arguments (agent call), and for updates takes the
    existing content to improve.
 2. Once composed, `save_issue` with the title, description, team, priority, labels, project
    (create) or id + changed fields (update).
@@ -214,7 +226,7 @@ between the two plugins - a future Jira/GitHub tracker plugin would implement th
    first (ticket-workflow standard).
 2. **set-status(id, target)** - `list_issue_statuses` to resolve the state, then `save_issue`.
 3. **branch-name(id, title)** - deterministic, no MCP:
-   `"$CLAUDE_PLUGIN_ROOT/scripts/branch-name.sh" --id <ID> --title "<title>"` ->
+   `"${CLAUDE_PLUGIN_ROOT}/scripts/branch-name.sh" --id <ID> --title "<title>"` ->
    `<ID>-<slug>` (github-flow). Use `--type feature|fix|chore` for non-ticket branches.
 4. **link-PR(id, prUrl)** - `create_attachment` (ticket -> PR), and ensure `Closes: <ID>` is
    in the PR body (PR -> ticket). This skill returns the line; the PR step creates the PR.
