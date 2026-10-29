@@ -1,0 +1,46 @@
+{
+  // markdownlint-cli2 config for a code repo. Copy to the repo root as
+  // `.markdownlint-cli2.jsonc` and commit it.
+  //
+  // This is the ONLY config file. Delete any `.markdownlint.jsonc`: when both
+  // exist the two MERGE and the older file wins every conflict, so a rule
+  // pinned here is silently overridden.
+  //
+  // `globs` means a bare `markdownlint-cli2` from the repo root lints
+  // everything. Pass `--no-globs` when linting one named file, or these globs
+  // are appended to your argument and the whole repo gets linted too.
+
+  "globs": ["**/*.md"],
+
+  "ignores": [
+    // Globbing FOLLOWS symlinks and there is no option to stop it, so a linked
+    // directory is linted as if it lived here. `thoughts/` points at shared
+    // planning material in the notes vault across several repos.
+    "thoughts/**",
+
+    "**/node_modules/**",
+    "**/vendor/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.venv/**"
+  ],
+
+  // markdownlint enables all rules by default; these are the only overrides.
+  "config": {
+    "MD013": false,                    // no line-length limit (never hard-wrap)
+    "MD024": false,                    // duplicate headings allowed
+
+    // Determinism pins: every "consistent"-by-default rule anchored to a fixed
+    // value, so the same content formats to the same bytes in any document.
+    "MD003": { "style": "atx" },       // headings: # not setext
+    "MD004": { "style": "dash" },      // unordered bullets: -
+    "MD007": { "indent": 4 },          // nested-list indent: 4 spaces
+    "MD029": { "style": "ordered" },   // ordered lists: 1. 2. 3.
+    "MD035": { "style": "---" },       // thematic breaks: ---
+    "MD046": { "style": "fenced" },    // code blocks: fenced, not indented
+    "MD048": { "style": "backtick" },  // fences: ``` not ~~~
+    "MD049": { "style": "asterisk" },  // emphasis: *italic*
+    "MD050": { "style": "asterisk" },  // strong: **bold**
+    "MD060": { "style": "compact" }    // tables: | cell | single-space padding
+  }
+}
