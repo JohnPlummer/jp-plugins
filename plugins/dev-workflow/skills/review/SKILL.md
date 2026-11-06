@@ -6,6 +6,7 @@ description: |
   plus the resolved standards cascade (external folder/repo -> repo, repo wins). Use for
   the CI review action and as a light local pass. NOT the multi-agent pre-merge loop
   with push/CI (that is the code-review skill) or the build workflow's Review phase.
+disable-model-invocation: true
 ---
 
 # review (the diff-oriented review engine)
